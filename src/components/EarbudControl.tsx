@@ -686,9 +686,7 @@ const EarbudControl = () => {
                 </div>
                 <Switch
                   checked={equalizerState.surroundVirtualiser}
-                  onCheckedChange={(checked) =>
-                    setEqualizerState(prev => ({ ...prev, surroundVirtualiser: checked }))
-                  }
+                  onCheckedChange={handleSurroundVirtualiserChange}
                   className="glass-switch"
                 />
               </div>
@@ -704,9 +702,7 @@ const EarbudControl = () => {
                 </div>
                 <Switch
                   checked={equalizerState.volumeLeveller}
-                  onCheckedChange={(checked) =>
-                    setEqualizerState(prev => ({ ...prev, volumeLeveller: checked }))
-                  }
+                  onCheckedChange={handleVolumeLevellerChange}
                   className="glass-switch"
                 />
               </div>
