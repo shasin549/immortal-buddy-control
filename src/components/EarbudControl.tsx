@@ -730,13 +730,16 @@ const EarbudControl = () => {
             </div>
           </div>
 
-          {/* Dolby Enhancement Features */}
+          {/* Enhanced Dolby Enhancement Features */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">+</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center shadow-lg shadow-red-500/30">
+                <span className="text-white text-sm font-bold">✨</span>
               </div>
-              <h3 className="text-lg font-medium text-foreground">Enhancement Suite</h3>
+              <div>
+                <h3 className="text-lg font-bold text-foreground">Dolby Enhancement Suite</h3>
+                <p className="text-xs text-red-400 uppercase tracking-wider">Advanced Audio Technologies</p>
+              </div>
             </div>
 
             <div className="space-y-4">
