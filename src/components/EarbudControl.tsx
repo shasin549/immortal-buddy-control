@@ -534,21 +534,34 @@ const EarbudControl = () => {
         </div>
 
         <div className="p-6 space-y-8 relative">
-          {/* Dolby-Style Equalizer */}
+          {/* Enhanced Dolby Equalizer */}
           <div className="space-y-6">
-            {/* Dolby Branding Header */}
-            <div className="text-center space-y-2">
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">D</span>
+            {/* Enhanced Dolby Branding Header */}
+            <div className="text-center space-y-3">
+              <div className="flex items-center justify-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-2xl shadow-red-500/50">
+                  <span className="text-white text-lg font-bold tracking-wider">D</span>
                 </div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-                  DIGITAL PLUS
-                </h2>
+                <div className="text-center">
+                  <h2 className="text-3xl font-black bg-gradient-to-r from-red-500 via-orange-500 to-red-600 bg-clip-text text-transparent tracking-wide">
+                    DOLBY ATMOS
+                  </h2>
+                  <div className="text-xs text-red-400 uppercase tracking-[0.2em] font-semibold">
+                    SPATIAL AUDIO
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                Professional Audio Enhancement
-              </p>
+              <div className="flex items-center justify-center gap-6 mt-4">
+                <div className="text-center">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mx-auto mb-1"></div>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">ACTIVE</span>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                    Immersive Audio Processing
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* EQ Grid Background */}
