@@ -52,6 +52,19 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				bluetooth: {
+					DEFAULT: 'hsl(var(--bluetooth-primary))',
+					secondary: 'hsl(var(--bluetooth-secondary))',
+					success: 'hsl(var(--bluetooth-success))',
+					warning: 'hsl(var(--bluetooth-warning))',
+					danger: 'hsl(var(--bluetooth-danger))'
+				},
+				battery: {
+					high: 'hsl(var(--battery-high))',
+					medium: 'hsl(var(--battery-medium))',
+					low: 'hsl(var(--battery-low))',
+					critical: 'hsl(var(--battery-critical))'
+				},
 				sidebar: {
 					DEFAULT: 'hsl(var(--sidebar-background))',
 					foreground: 'hsl(var(--sidebar-foreground))',
@@ -67,6 +80,18 @@ export default {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
+			},
+			backgroundImage: {
+				'gradient-primary': 'var(--gradient-primary)',
+				'gradient-card': 'var(--gradient-card)',
+				'gradient-glow': 'var(--gradient-glow)'
+			},
+			boxShadow: {
+				'glow': 'var(--shadow-glow)',
+				'card': 'var(--shadow-card)'
+			},
+			transitionTimingFunction: {
+				'smooth': 'var(--transition-smooth)'
 			},
 			keyframes: {
 				'accordion-down': {
