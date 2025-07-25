@@ -142,3 +142,75 @@ All colors MUST be HSL.
     @apply bg-background text-foreground;
   }
 }
+
+@layer components {
+  .glass-card {
+    @apply relative overflow-hidden;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-backdrop-blur);
+    -webkit-backdrop-filter: var(--glass-backdrop-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-glass);
+    transition: var(--transition-glass);
+  }
+
+  .glass-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--glass-highlight);
+    opacity: 0.6;
+  }
+
+  .glass-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glass), 0 16px 48px hsl(230 35% 5% / 0.4);
+    border-color: hsl(217 91% 60% / 0.3);
+  }
+
+  .glass-primary {
+    background: var(--gradient-glass-primary);
+    border-color: hsl(217 91% 60% / 0.3);
+  }
+
+  .glass-accent {
+    background: var(--gradient-glass-accent);
+    border-color: hsl(265 85% 70% / 0.3);
+  }
+
+  .glass-surface {
+    background: var(--gradient-glass-card);
+    backdrop-filter: var(--glass-backdrop-blur);
+    -webkit-backdrop-filter: var(--glass-backdrop-blur);
+  }
+
+  .glass-button {
+    @apply relative overflow-hidden;
+    background: var(--gradient-glass-primary);
+    backdrop-filter: var(--glass-backdrop-blur);
+    -webkit-backdrop-filter: var(--glass-backdrop-blur);
+    border: 1px solid hsl(217 91% 60% / 0.3);
+    transition: var(--transition-glass);
+  }
+
+  .glass-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--glass-highlight);
+    opacity: 0.8;
+  }
+
+  .glass-button:hover {
+    transform: translateY(-1px);
+    background: linear-gradient(135deg, hsl(217 91% 60% / 0.25), hsl(265 85% 70% / 0.2));
+    border-color: hsl(217 91% 60% / 0.5);
+    box-shadow: 0 8px 24px hsl(217 91% 60% / 0.2);
+  }
+}
