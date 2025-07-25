@@ -454,9 +454,37 @@ const EarbudControl = () => {
             >
               <Scan className={`w-5 h-5 ${earbudState.isScanning ? 'animate-spin' : ''}`} />
             </Button>
-            <Button variant="ghost" size="icon">
-              <MoreVertical className="w-5 h-5" />
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="glass-button border-0">
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="glass-card glass-surface border-glass-border">
+                <DropdownMenuItem onClick={scanForDevices} disabled={earbudState.isScanning}>
+                  <Scan className="w-4 h-4 mr-2" />
+                  {earbudState.isScanning ? 'Scanning...' : 'Scan for Devices'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={addDemoDevices}>
+                  <Power className="w-4 h-4 mr-2" />
+                  Add Demo Devices
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-glass-border" />
+                <DropdownMenuItem onClick={clearAllDevices}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear All Devices
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-glass-border" />
+                <DropdownMenuItem>
+                  <Info className="w-4 h-4 mr-2" />
+                  About
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
