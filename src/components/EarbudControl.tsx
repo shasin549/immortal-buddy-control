@@ -208,9 +208,10 @@ const EarbudControl = () => {
                 </div>
                 <Switch
                   checked={equalizerState.surroundVirtualiser}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     setEqualizerState(prev => ({ ...prev, surroundVirtualiser: checked }))
                   }
+                  className="glass-switch"
                 />
               </div>
             </Card>
@@ -225,9 +226,10 @@ const EarbudControl = () => {
                 </div>
                 <Switch
                   checked={equalizerState.volumeLeveller}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     setEqualizerState(prev => ({ ...prev, volumeLeveller: checked }))
                   }
+                  className="glass-switch"
                 />
               </div>
             </Card>
@@ -267,9 +269,9 @@ const EarbudControl = () => {
                 ) : (
                   <Bluetooth className="w-4 h-4 text-muted-foreground" />
                 )}
-                <Badge 
+                <Badge
                   variant={earbudState.isConnected ? "default" : "secondary"}
-                  className="text-xs uppercase tracking-wide"
+                  className="text-xs uppercase tracking-wide glass-badge border-0"
                 >
                   {earbudState.isConnected ? "Connected" : "Available"}
                 </Badge>
@@ -318,17 +320,18 @@ const EarbudControl = () => {
                     <Switch
                       checked={earbudState.leftEnabled}
                       onCheckedChange={toggleLeft}
+                      className="glass-switch"
                     />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Battery className="w-4 h-4 text-muted-foreground" />
-                      <div className="flex-1 bg-secondary rounded-full h-2">
-                        <div 
-                          className="h-full rounded-full transition-all duration-300"
+                      <div className="flex-1 glass-progress h-2">
+                        <div
+                          className="h-full glass-progress-indicator"
                           style={{
                             width: `${earbudState.leftBattery}%`,
-                            backgroundColor: `hsl(var(--${getBatteryColor(earbudState.leftBattery)}))`
+                            background: `linear-gradient(90deg, hsl(var(--${getBatteryColor(earbudState.leftBattery)})), hsl(var(--${getBatteryColor(earbudState.leftBattery)})) 50%, hsl(var(--${getBatteryColor(earbudState.leftBattery)}) / 0.8))`
                           }}
                         />
                       </div>
@@ -346,17 +349,18 @@ const EarbudControl = () => {
                     <Switch
                       checked={earbudState.rightEnabled}
                       onCheckedChange={toggleRight}
+                      className="glass-switch"
                     />
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <Battery className="w-4 h-4 text-muted-foreground" />
-                      <div className="flex-1 bg-secondary rounded-full h-2">
-                        <div 
-                          className="h-full rounded-full transition-all duration-300"
+                      <div className="flex-1 glass-progress h-2">
+                        <div
+                          className="h-full glass-progress-indicator"
                           style={{
                             width: `${earbudState.rightBattery}%`,
-                            backgroundColor: `hsl(var(--${getBatteryColor(earbudState.rightBattery)}))`
+                            background: `linear-gradient(90deg, hsl(var(--${getBatteryColor(earbudState.rightBattery)})), hsl(var(--${getBatteryColor(earbudState.rightBattery)})) 50%, hsl(var(--${getBatteryColor(earbudState.rightBattery)}) / 0.8))`
                           }}
                         />
                       </div>
@@ -389,10 +393,10 @@ const EarbudControl = () => {
                     className="w-full"
                   />
                   <div className="text-center">
-                    <Badge variant="outline" className="text-xs">
-                      {earbudState.audioBalance === 0 
-                        ? "Centered" 
-                        : earbudState.audioBalance < 0 
+                    <Badge variant="outline" className="text-xs glass-badge">
+                      {earbudState.audioBalance === 0
+                        ? "Centered"
+                        : earbudState.audioBalance < 0
                           ? `Left ${Math.abs(earbudState.audioBalance)}%`
                           : `Right ${earbudState.audioBalance}%`
                       }
@@ -410,16 +414,16 @@ const EarbudControl = () => {
                   <h3 className="font-medium text-foreground">Charging Case</h3>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 bg-secondary rounded-full h-3">
-                    <div 
-                      className="h-full rounded-full transition-all duration-300"
+                  <div className="flex-1 glass-progress h-3">
+                    <div
+                      className="h-full glass-progress-indicator"
                       style={{
                         width: `${earbudState.caseBattery}%`,
-                        backgroundColor: `hsl(var(--${getBatteryColor(earbudState.caseBattery)}))`
+                        background: `linear-gradient(90deg, hsl(var(--${getBatteryColor(earbudState.caseBattery)})), hsl(var(--${getBatteryColor(earbudState.caseBattery)})) 50%, hsl(var(--${getBatteryColor(earbudState.caseBattery)}) / 0.8))`
                       }}
                     />
                   </div>
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs glass-badge">
                     {earbudState.caseBattery}%
                   </Badge>
                 </div>
