@@ -454,11 +454,12 @@ const EarbudControl = () => {
             </Button>
 
             {/* Disconnect Button */}
-            <Button 
+            <Button
               onClick={toggleConnection}
               variant="destructive"
-              className="w-full mt-2"
+              className="w-full mt-2 glass-button border-0 bg-gradient-to-r from-destructive/80 to-destructive/60"
             >
+              <Power className="w-4 h-4 mr-2" />
               Disconnect Device
             </Button>
           </>
