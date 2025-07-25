@@ -236,6 +236,11 @@ const EarbudControl = () => {
       ...prev,
       selectedDevice: prev.selectedDevice?.id === device.id ? null : prev.selectedDevice
     }));
+
+    toast({
+      title: "Device Disconnected",
+      description: `Disconnected from ${device.name}`,
+    });
   };
 
   const startBatteryMonitoring = (deviceId: string) => {
