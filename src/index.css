@@ -227,6 +227,20 @@ All colors MUST be HSL.
     border-radius: 1rem;
   }
 
+  .slider-glass [data-orientation="vertical"] [data-state] {
+    background: linear-gradient(180deg, hsl(217 91% 60%), hsl(217 91% 50%));
+    border-radius: 0.75rem;
+    box-shadow: 0 2px 8px hsl(217 91% 60% / 0.4);
+  }
+
+  .slider-glass [data-orientation="vertical"] [role="slider"] {
+    width: 20px;
+    height: 20px;
+    background: hsl(217 91% 60%);
+    border: 2px solid white;
+    box-shadow: 0 2px 8px hsl(217 91% 60% / 0.6);
+  }
+
   .slider-glass [data-orientation="horizontal"] {
     background: var(--gradient-glass-card);
     backdrop-filter: var(--glass-backdrop-blur);
