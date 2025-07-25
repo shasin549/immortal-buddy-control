@@ -610,13 +610,13 @@ const EarbudControl = () => {
                     <div
                       className="h-full glass-progress-indicator"
                       style={{
-                        width: `${earbudState.caseBattery}%`,
-                        background: `linear-gradient(90deg, hsl(var(--${getBatteryColor(earbudState.caseBattery)})), hsl(var(--${getBatteryColor(earbudState.caseBattery)})) 50%, hsl(var(--${getBatteryColor(earbudState.caseBattery)}) / 0.8))`
+                        width: `${Math.round(earbudState.selectedDevice?.caseBattery || 0)}%`,
+                        background: `linear-gradient(90deg, hsl(var(--${getBatteryColor(earbudState.selectedDevice?.caseBattery || 0)})), hsl(var(--${getBatteryColor(earbudState.selectedDevice?.caseBattery || 0)})) 50%, hsl(var(--${getBatteryColor(earbudState.selectedDevice?.caseBattery || 0)}) / 0.8))`
                       }}
                     />
                   </div>
                   <Badge variant="outline" className="text-xs glass-badge">
-                    {earbudState.caseBattery}%
+                    {Math.round(earbudState.selectedDevice?.caseBattery || 0)}%
                   </Badge>
                 </div>
               </div>
