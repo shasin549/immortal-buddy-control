@@ -278,13 +278,15 @@ const EarbudControl = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 {earbudState.isConnected ? (
-                  <BluetoothConnected className="w-4 h-4 text-primary" />
+                  <BluetoothConnected className="w-4 h-4 text-primary animate-pulse" />
                 ) : (
                   <Bluetooth className="w-4 h-4 text-muted-foreground" />
                 )}
                 <Badge
                   variant={earbudState.isConnected ? "default" : "secondary"}
-                  className="text-xs uppercase tracking-wide glass-badge border-0"
+                  className={`text-xs uppercase tracking-wide glass-badge border-0 transition-all duration-500 ${
+                    earbudState.isConnected ? 'bg-primary/20 text-primary' : ''
+                  }`}
                 >
                   {earbudState.isConnected ? "Connected" : "Available"}
                 </Badge>
