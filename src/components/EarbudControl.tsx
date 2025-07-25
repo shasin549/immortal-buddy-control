@@ -430,8 +430,8 @@ const EarbudControl = () => {
       setIsPlayingDemo(true);
 
       toast({
-        title: "Audio Started",
-        description: "Audio controls are now active.",
+        title: "Test Audio Started",
+        description: "Try adjusting the controls to hear the effects. Test tones will play for 30 seconds.",
       });
 
       // Stop after 30 seconds
