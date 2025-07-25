@@ -530,15 +530,25 @@ const EarbudControl = () => {
           <Card className="p-8 glass-card glass-surface text-center">
             <Bluetooth className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">No Devices Found</h3>
-            <p className="text-muted-foreground mb-4">Click the scan button to discover nearby Bluetooth devices</p>
-            <Button
-              onClick={scanForDevices}
-              className="glass-button border-0"
-              variant="ghost"
-            >
-              <Scan className="w-4 h-4 mr-2" />
-              Scan for Devices
-            </Button>
+            <p className="text-muted-foreground mb-6">Scan for nearby Bluetooth devices or try demo devices</p>
+            <div className="flex flex-col gap-3 w-full max-w-sm mx-auto">
+              <Button
+                onClick={scanForDevices}
+                className="glass-button border-0 w-full"
+                variant="ghost"
+              >
+                <Scan className="w-4 h-4 mr-2" />
+                Scan for Real Devices
+              </Button>
+              <Button
+                onClick={addDemoDevices}
+                className="glass-button border-0 w-full"
+                variant="ghost"
+              >
+                <Power className="w-4 h-4 mr-2" />
+                Try Demo Devices
+              </Button>
+            </div>
           </Card>
         )}
 
