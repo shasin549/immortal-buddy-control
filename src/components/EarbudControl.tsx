@@ -257,7 +257,12 @@ const EarbudControl = () => {
 
       <div className="px-4 space-y-4">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-foreground">My Devices</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-semibold text-foreground">My Devices</h2>
+            <Badge variant="outline" className="glass-badge text-xs">
+              {earbudState.isConnected ? "1 Connected" : "0 Connected"}
+            </Badge>
+          </div>
           <Button variant="ghost" size="icon">
             <MoreVertical className="w-5 h-5" />
           </Button>
