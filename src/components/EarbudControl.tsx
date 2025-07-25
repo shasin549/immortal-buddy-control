@@ -86,17 +86,27 @@ const EarbudControl = () => {
 
         } catch (bluetoothError) {
           console.log('Bluetooth access denied or cancelled:', bluetoothError);
-          // Fallback to demo devices if user cancels or denies permission
+          toast({
+            title: "Bluetooth Access Denied",
+            description: "Showing demo devices instead. Grant permission to scan real devices.",
+          });
           addDemoDevices();
         }
       } else {
-        // Fallback to demo devices if Bluetooth not supported
-        console.log('Bluetooth not supported, showing demo devices');
+        toast({
+          title: "Bluetooth Not Supported",
+          description: "Your browser doesn't support Bluetooth. Showing demo devices.",
+        });
         addDemoDevices();
       }
 
     } catch (error) {
       console.error('Scan error:', error);
+      toast({
+        title: "Scan Failed",
+        description: "Unable to scan for devices. Showing demo devices.",
+        variant: "destructive",
+      });
       addDemoDevices();
     } finally {
       // Add delay to show scanning animation
