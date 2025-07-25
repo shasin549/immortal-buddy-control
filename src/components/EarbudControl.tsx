@@ -123,11 +123,33 @@ const EarbudControl = () => {
         description: `Found ${newDevice.name}`,
       });
 
-    } catch (bluetoothError) {
+    } catch (bluetoothError: any) {
       console.log('Bluetooth access denied or cancelled:', bluetoothError);
+
+      let errorTitle = "Connection Failed";
+      let errorDescription = "Unable to connect to Bluetooth device.";
+
+      // Check for specific error types
+      if (bluetoothError.name === 'NotAllowedError') {
+        errorTitle = "Permission Denied";
+        errorDescription = "Bluetooth permission was denied. Please allow Bluetooth access in your browser settings.";
+      } else if (bluetoothError.name === 'NotSupportedError') {
+        errorTitle = "Not Supported";
+        errorDescription = "Web Bluetooth is not supported in this browser. Try Chrome or Edge.";
+      } else if (bluetoothError.name === 'SecurityError') {
+        errorTitle = "Security Error";
+        errorDescription = "Bluetooth requires HTTPS. This may not work on HTTP connections.";
+      } else if (bluetoothError.name === 'NotFoundError') {
+        errorTitle = "No Devices Found";
+        errorDescription = "No Bluetooth devices found. Make sure your device is discoverable.";
+      } else if (bluetoothError.message && bluetoothError.message.includes('cancelled')) {
+        errorTitle = "Scan Cancelled";
+        errorDescription = "Device scan was cancelled by user.";
+      }
+
       toast({
-        title: "Access Denied",
-        description: "Permission was denied or cancelled. Try again.",
+        title: errorTitle,
+        description: errorDescription,
         variant: "destructive",
       });
     } finally {
