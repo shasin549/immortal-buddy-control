@@ -685,6 +685,12 @@ const EarbudControl = () => {
     setEqualizerState(prev => {
       const newState = { ...prev, surroundVirtualiser: checked };
       updateAudioControls(null, newState);
+
+      toast({
+        title: checked ? "Dolby Atmos Enabled" : "Dolby Atmos Disabled",
+        description: checked ? "360° spatial audio processing activated" : "Standard stereo playback",
+      });
+
       return newState;
     });
   };
@@ -849,7 +855,7 @@ const EarbudControl = () => {
                   id: 'manual',
                   label: 'Custom',
                   description: 'Manual tuning',
-                  icon: '🎛️',
+                  icon: '🎛��',
                   gradient: 'from-slate-600 to-slate-700'
                 },
                 {
