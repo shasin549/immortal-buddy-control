@@ -352,6 +352,15 @@ const EarbudControl = () => {
   };
 
   const startDemoAudio = async () => {
+    if (!earbudState.selectedDevice) {
+      toast({
+        title: "No Device Connected",
+        description: "Please connect a device first to test audio controls.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       if (!isAudioInitialized) {
         await initializeAudioEngine();
@@ -360,7 +369,7 @@ const EarbudControl = () => {
       // Try to find an existing audio element on the page first
       const existingAudio = document.querySelector('audio') as HTMLAudioElement;
 
-      if (existingAudio && existingAudio.src) {
+      if (existingAudio && existingAudio.src && !existingAudio.paused) {
         await audioEngine.connectToAudioElement(existingAudio);
         updateAudioControls();
 
@@ -371,37 +380,8 @@ const EarbudControl = () => {
         return;
       }
 
-      // Create demo audio with online test audio
-      const audio = audioElementRef.current || document.createElement('audio');
-      audio.crossOrigin = 'anonymous';
-      audio.loop = true;
-      audio.volume = 0.3;
-
-      // Audio source would be provided by user or system
-      audio.src = '';
-
-      // Fallback to local oscillator if external audio fails
-      const playDemo = async () => {
-        try {
-          await audio.play();
-          await audioEngine.connectToAudioElement(audio);
-          updateAudioControls();
-          setIsPlayingDemo(true);
-
-          toast({
-            title: "Audio Started",
-            description: "Audio controls are now active.",
-          });
-        } catch (playError) {
-          // If external audio fails, create an oscillator demo
-          createOscillatorDemo();
-        }
-      };
-
-      audio.addEventListener('canplaythrough', playDemo, { once: true });
-      audio.addEventListener('error', () => createOscillatorDemo(), { once: true });
-
-      audio.load();
+      // Create oscillator demo since we removed external audio sources
+      createOscillatorDemo();
 
     } catch (error) {
       console.error('Failed to start demo audio:', error);
