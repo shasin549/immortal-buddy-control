@@ -27,7 +27,7 @@ interface EqualizerState {
 const EarbudControl = () => {
   const [currentView, setCurrentView] = useState<'devices' | 'settings'>('devices');
   const [earbudState, setEarbudState] = useState<EarbudState>({
-    isConnected: false,
+    isConnected: true, // Start connected for testing
     leftEnabled: true,
     rightEnabled: true,
     leftBattery: 85,
