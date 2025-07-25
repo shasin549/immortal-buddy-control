@@ -478,6 +478,13 @@ const EarbudControl = () => {
         preset
       };
       updateAudioControls(null, newState);
+
+      // Show preset applied feedback
+      toast({
+        title: "EQ Preset Applied",
+        description: `${preset.charAt(0).toUpperCase() + preset.slice(1).replace('-', ' ')} profile activated`,
+      });
+
       return newState;
     });
   };
