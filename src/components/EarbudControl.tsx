@@ -52,7 +52,7 @@ const EarbudControl = () => {
     rightEnabled: true,
     audioBalance: 0,
     isScanning: false,
-    bluetoothSupported: 'bluetooth' in navigator,
+    bluetoothSupported: 'bluetooth' in navigator && window.isSecureContext,
   });
 
   const [equalizerState, setEqualizerState] = useState<EqualizerState>({
