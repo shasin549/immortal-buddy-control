@@ -695,10 +695,10 @@ const EarbudControl = () => {
                 <Button
                   key={preset.id}
                   variant="ghost"
-                  className={`h-20 p-4 transition-all duration-300 relative overflow-hidden ${
+                  className={`h-24 p-4 transition-all duration-500 relative overflow-hidden group ${
                     equalizerState.preset === preset.id
-                      ? 'bg-gradient-to-br from-red-500/20 to-orange-500/20 border-2 border-red-500/50 shadow-lg shadow-red-500/20'
-                      : 'bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 hover:border-red-500/30'
+                      ? `bg-gradient-to-br ${preset.gradient}/20 border-2 border-red-500/60 shadow-xl shadow-red-500/30 scale-105`
+                      : 'bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 hover:border-red-500/40 hover:shadow-lg hover:shadow-red-500/10'
                   }`}
                   onClick={() => applyPreset(preset.id as EqualizerState['preset'])}
                 >
