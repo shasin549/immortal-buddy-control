@@ -137,15 +137,15 @@ const EarbudControl = () => {
         <div className="p-6 space-y-8 relative">
           {/* Equalizer */}
           <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Bass</span>
-              <span className="text-sm text-muted-foreground">Treble</span>
+            <div className="flex justify-between items-center px-4">
+              <span className="text-sm text-muted-foreground font-medium">Bass</span>
+              <span className="text-sm text-muted-foreground font-medium">Treble</span>
             </div>
-            
-            <div className="flex justify-between items-end h-64 px-4 glass-card glass-surface rounded-lg glass-shimmer">
+
+            <div className="flex justify-between items-end h-64 px-6 py-6 glass-card glass-surface rounded-xl glass-shimmer">
               {equalizerState.sliders.map((value, index) => (
-                <div key={index} className="flex flex-col items-center h-full py-4">
-                  <div className="flex-1 flex items-end pb-2">
+                <div key={index} className="flex flex-col items-center h-full">
+                  <div className="flex-1 flex items-end pb-4">
                     <Slider
                       value={[value]}
                       onValueChange={(newValue) => handleEqualizerChange(index, newValue)}
@@ -153,7 +153,7 @@ const EarbudControl = () => {
                       max={100}
                       step={1}
                       orientation="vertical"
-                      className="h-48 w-3 slider-glass"
+                      className="h-44 w-4 slider-glass"
                     />
                   </div>
                 </div>
