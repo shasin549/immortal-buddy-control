@@ -179,10 +179,16 @@ const EarbudControl = () => {
   };
 
   const disconnectDevice = (device: BluetoothDevice) => {
-    // Disconnect audio engine
+    // Stop any playing audio and disconnect audio engine
+    const audio = audioEngine.getCurrentAudioElement();
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
     audioEngine.disconnect();
     setIsAudioInitialized(false);
     setIsPlayingDemo(false);
+
     const disconnectedDevice: BluetoothDevice = {
       ...device,
       isConnected: false,
@@ -200,7 +206,7 @@ const EarbudControl = () => {
 
     toast({
       title: "Device Disconnected",
-      description: `Disconnected from ${device.name}`,
+      description: `Disconnected from ${device.name}. Audio controls disabled.`,
     });
   };
 
