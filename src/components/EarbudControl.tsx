@@ -53,22 +53,132 @@ const EarbudControl = () => {
     volumeLeveller: true,
   });
 
+  // Real-time device scanning
+  const scanForDevices = async () => {
+    if (!navigator.bluetooth) {
+      alert('Bluetooth not supported in this browser');
+      return;
+    }
+
+    setEarbudState(prev => ({ ...prev, isScanning: true }));
+
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: ['battery_service', 'device_information']
+      });
+
+      const newDevice: BluetoothDevice = {
+        id: device.id || `device_${Date.now()}`,
+        name: device.name || 'Unknown Device',
+        type: detectDeviceType(device.name || ''),
+        isConnected: false,
+        isPaired: true,
+        rssi: -50 // Would come from actual scan
+      };
+
+      setAvailableDevices(prev => {
+        const exists = prev.find(d => d.id === newDevice.id);
+        if (exists) return prev;
+        return [...prev, newDevice];
+      });
+
+    } catch (error) {
+      console.log('Bluetooth scan cancelled or failed:', error);
+    } finally {
+      setEarbudState(prev => ({ ...prev, isScanning: false }));
+    }
+  };
+
+  const detectDeviceType = (name: string): BluetoothDevice['type'] => {
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes('earbud') || lowerName.includes('airpods') || lowerName.includes('buds')) {
+      return 'earbuds';
+    }
+    if (lowerName.includes('headphone') || lowerName.includes('headset')) {
+      return 'headphones';
+    }
+    if (lowerName.includes('speaker')) {
+      return 'speaker';
+    }
+    return 'unknown';
+  };
+
+  const connectToDevice = async (device: BluetoothDevice) => {
+    try {
+      // Simulate connection process
+      setEarbudState(prev => ({ ...prev, isScanning: true }));
+
+      // In real implementation, this would connect to the actual device
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const connectedDevice: BluetoothDevice = {
+        ...device,
+        isConnected: true,
+        leftBattery: Math.floor(Math.random() * 40) + 60, // Real-time battery would come from device
+        rightBattery: Math.floor(Math.random() * 40) + 60,
+        caseBattery: Math.floor(Math.random() * 40) + 50,
+      };
+
+      setConnectedDevices(prev => [...prev.filter(d => d.id !== device.id), connectedDevice]);
+      setAvailableDevices(prev => prev.filter(d => d.id !== device.id));
+      setEarbudState(prev => ({
+        ...prev,
+        selectedDevice: connectedDevice,
+        isScanning: false
+      }));
+
+      // Start battery monitoring
+      startBatteryMonitoring(connectedDevice.id);
+
+    } catch (error) {
+      console.error('Failed to connect:', error);
+      setEarbudState(prev => ({ ...prev, isScanning: false }));
+    }
+  };
+
+  const disconnectDevice = (device: BluetoothDevice) => {
+    const disconnectedDevice: BluetoothDevice = {
+      ...device,
+      isConnected: false,
+      leftBattery: undefined,
+      rightBattery: undefined,
+      caseBattery: undefined,
+    };
+
+    setAvailableDevices(prev => [...prev, disconnectedDevice]);
+    setConnectedDevices(prev => prev.filter(d => d.id !== device.id));
+    setEarbudState(prev => ({
+      ...prev,
+      selectedDevice: prev.selectedDevice?.id === device.id ? null : prev.selectedDevice
+    }));
+  };
+
+  const startBatteryMonitoring = (deviceId: string) => {
+    // Simulate real-time battery updates
+    const interval = setInterval(() => {
+      setConnectedDevices(prev => prev.map(device => {
+        if (device.id === deviceId) {
+          return {
+            ...device,
+            leftBattery: Math.max(0, (device.leftBattery || 80) - Math.random() * 2),
+            rightBattery: Math.max(0, (device.rightBattery || 80) - Math.random() * 2),
+            caseBattery: Math.max(0, (device.caseBattery || 70) - Math.random() * 1),
+          };
+        }
+        return device;
+      }));
+    }, 30000); // Update every 30 seconds
+
+    // Clean up interval when component unmounts or device disconnects
+    return () => clearInterval(interval);
+  };
+
   const getBatteryColor = (level: number) => {
     if (level > 60) return "battery-high";
     if (level > 30) return "battery-medium";
     if (level > 15) return "battery-low";
     return "battery-critical";
-  };
-
-  const toggleConnection = () => {
-    setEarbudState(prev => {
-      const newState = {
-        ...prev,
-        isConnected: !prev.isConnected
-      };
-      console.log('Connection state changing from', prev.isConnected, 'to', newState.isConnected);
-      return newState;
-    });
   };
 
   const toggleLeft = () => {
