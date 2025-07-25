@@ -1251,16 +1251,16 @@ const EarbudControl = () => {
                     onValueChange={handleBalanceChange}
                     min={-100}
                     max={100}
-                    step={1}
+                    step={5}
                     className="w-full slider-glass"
                   />
                   <div className="text-center">
                     <Badge variant="outline" className="text-xs glass-badge">
                       {earbudState.audioBalance === 0
-                        ? "Centered"
+                        ? "Perfectly Centered"
                         : earbudState.audioBalance < 0
-                          ? `Left ${Math.abs(earbudState.audioBalance)}%`
-                          : `Right ${earbudState.audioBalance}%`
+                          ? `${Math.abs(earbudState.audioBalance)}% Left Bias`
+                          : `${earbudState.audioBalance}% Right Bias`
                       }
                     </Badge>
                   </div>
