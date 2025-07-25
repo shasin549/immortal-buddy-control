@@ -366,6 +366,230 @@ const EarbudControl = () => {
     });
   };
 
+  // Audio engine integration functions
+  const initializeAudioEngine = async () => {
+    if (isAudioInitialized) return;
+
+    try {
+      await audioEngine.initialize();
+      setIsAudioInitialized(true);
+
+      toast({
+        title: "Audio System Ready",
+        description: "You can now use audio controls with any playing audio.",
+      });
+    } catch (error) {
+      console.error('Failed to initialize audio:', error);
+      toast({
+        title: "Audio Initialization Failed",
+        description: "Audio controls may not work properly.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateAudioControls = (earbudStateOverride?: Partial<EarbudState>, equalizerStateOverride?: Partial<EqualizerState>) => {
+    if (!isAudioInitialized) return;
+
+    const currentEarbudState = earbudStateOverride ? { ...earbudState, ...earbudStateOverride } : earbudState;
+    const currentEqualizerState = equalizerStateOverride ? { ...equalizerState, ...equalizerStateOverride } : equalizerState;
+
+    const audioControlState: AudioControlState = {
+      leftEnabled: currentEarbudState.leftEnabled,
+      rightEnabled: currentEarbudState.rightEnabled,
+      audioBalance: currentEarbudState.audioBalance,
+      equalizerBands: currentEqualizerState.sliders,
+      surroundVirtualiser: currentEqualizerState.surroundVirtualiser,
+      volumeLeveller: currentEqualizerState.volumeLeveller,
+    };
+
+    audioEngine.updateControls(audioControlState);
+  };
+
+  const startDemoAudio = async () => {
+    try {
+      if (!isAudioInitialized) {
+        await initializeAudioEngine();
+      }
+
+      // Try to find an existing audio element on the page first
+      const existingAudio = document.querySelector('audio') as HTMLAudioElement;
+
+      if (existingAudio && existingAudio.src) {
+        await audioEngine.connectToAudioElement(existingAudio);
+        updateAudioControls();
+
+        toast({
+          title: "Connected to Existing Audio",
+          description: "Audio controls are now active for the current audio source.",
+        });
+        return;
+      }
+
+      // Create demo audio with online test audio
+      const audio = audioElementRef.current || document.createElement('audio');
+      audio.crossOrigin = 'anonymous';
+      audio.loop = true;
+      audio.volume = 0.3;
+
+      // Use a test audio file
+      audio.src = 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav';
+
+      // Fallback to local oscillator if external audio fails
+      const playDemo = async () => {
+        try {
+          await audio.play();
+          await audioEngine.connectToAudioElement(audio);
+          updateAudioControls();
+          setIsPlayingDemo(true);
+
+          toast({
+            title: "Demo Audio Started",
+            description: "Test audio is playing. Try the controls to hear the difference!",
+          });
+        } catch (playError) {
+          // If external audio fails, create an oscillator demo
+          createOscillatorDemo();
+        }
+      };
+
+      audio.addEventListener('canplaythrough', playDemo, { once: true });
+      audio.addEventListener('error', () => createOscillatorDemo(), { once: true });
+
+      audio.load();
+
+    } catch (error) {
+      console.error('Failed to start demo audio:', error);
+      createOscillatorDemo();
+    }
+  };
+
+  const createOscillatorDemo = async () => {
+    try {
+      if (!audioEngine.getAudioContext()) {
+        await audioEngine.initialize();
+      }
+
+      const audioContext = audioEngine.getAudioContext();
+      if (!audioContext) return;
+
+      // Create demo tones
+      const oscillator1 = audioContext.createOscillator();
+      const oscillator2 = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator1.type = 'sine';
+      oscillator1.frequency.value = 440; // A4
+      oscillator2.type = 'sine';
+      oscillator2.frequency.value = 554.37; // C#5
+
+      gainNode.gain.value = 0.1;
+
+      // Create a simple audio element that we can connect to
+      const audio = document.createElement('audio');
+      const mediaStreamDestination = audioContext.createMediaStreamDestination();
+
+      oscillator1.connect(gainNode);
+      oscillator2.connect(gainNode);
+      gainNode.connect(mediaStreamDestination);
+
+      audio.srcObject = mediaStreamDestination.stream;
+      audio.loop = true;
+
+      oscillator1.start();
+      oscillator2.start();
+
+      await audio.play();
+      await audioEngine.connectToAudioElement(audio);
+      updateAudioControls();
+      setIsPlayingDemo(true);
+
+      toast({
+        title: "Demo Tones Started",
+        description: "Test tones are playing. Try the controls!",
+      });
+
+      // Stop after 30 seconds
+      setTimeout(() => {
+        oscillator1.stop();
+        oscillator2.stop();
+        setIsPlayingDemo(false);
+      }, 30000);
+
+    } catch (error) {
+      toast({
+        title: "Demo Audio Failed",
+        description: "Could not create demo audio. Controls will work with any audio playing on the page.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopDemoAudio = () => {
+    const audio = audioEngine.getCurrentAudioElement();
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    audioEngine.disconnect();
+    setIsPlayingDemo(false);
+    setIsAudioInitialized(false);
+
+    toast({
+      title: "Demo Audio Stopped",
+      description: "Audio controls are now inactive.",
+    });
+  };
+
+  // Auto-detect and connect to any audio playing on the page
+  useEffect(() => {
+    const connectToPageAudio = async () => {
+      if (!earbudState.selectedDevice || isPlayingDemo) return;
+
+      const audioElements = document.querySelectorAll('audio, video');
+      for (const element of audioElements) {
+        const mediaElement = element as HTMLAudioElement | HTMLVideoElement;
+        if (!mediaElement.paused && mediaElement.currentTime > 0) {
+          try {
+            if (!isAudioInitialized) {
+              await initializeAudioEngine();
+            }
+            await audioEngine.connectToAudioElement(mediaElement);
+            updateAudioControls();
+
+            toast({
+              title: "Connected to Page Audio",
+              description: "Audio controls are now active for the playing media.",
+            });
+            break;
+          } catch (error) {
+            console.error('Failed to connect to page audio:', error);
+          }
+        }
+      }
+    };
+
+    const interval = setInterval(connectToPageAudio, 2000);
+    return () => clearInterval(interval);
+  }, [earbudState.selectedDevice, isPlayingDemo, isAudioInitialized]);
+
+  // Update audio controls when equalizer settings change
+  const handleSurroundVirtualiserChange = (checked: boolean) => {
+    setEqualizerState(prev => {
+      const newState = { ...prev, surroundVirtualiser: checked };
+      updateAudioControls(null, newState);
+      return newState;
+    });
+  };
+
+  const handleVolumeLevellerChange = (checked: boolean) => {
+    setEqualizerState(prev => {
+      const newState = { ...prev, volumeLeveller: checked };
+      updateAudioControls(null, newState);
+      return newState;
+    });
+  };
+
   if (currentView === 'settings') {
     return (
       <div className="min-h-screen bg-background glass-bg-animated">
