@@ -83,7 +83,7 @@ const EarbudControl = () => {
 
     toast({
       title: "Demo Device Added",
-      description: "You can now explore the app features with this demo device.",
+      description: "Demo device added! You can explore all app features. Real Bluetooth requires HTTPS and compatible browser.",
     });
   };
 
