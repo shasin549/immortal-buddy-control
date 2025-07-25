@@ -60,6 +60,48 @@ const EarbudControl = () => {
     volumeLeveller: true,
   });
 
+  // Demo devices for when Bluetooth is not supported
+  const addDemoDevices = () => {
+    const demoDevices: BluetoothDevice[] = [
+      {
+        id: 'boat_airdopes_demo',
+        name: 'boAt Airdopes 161',
+        type: 'earbuds',
+        isConnected: false,
+        isPaired: true,
+        rssi: -45
+      },
+      {
+        id: 'boat_rockerz_demo',
+        name: 'boAt Rockerz 450',
+        type: 'headphones',
+        isConnected: false,
+        isPaired: true,
+        rssi: -55
+      },
+      {
+        id: 'boat_stone_demo',
+        name: 'boAt Stone 352',
+        type: 'speaker',
+        isConnected: false,
+        isPaired: true,
+        rssi: -38
+      }
+    ];
+
+    setAvailableDevices(prev => {
+      const newDevices = demoDevices.filter(demo =>
+        !prev.find(existing => existing.id === demo.id)
+      );
+      return [...prev, ...newDevices];
+    });
+
+    toast({
+      title: "Demo Devices Added",
+      description: "Try connecting to these demo devices to explore the app features.",
+    });
+  };
+
   // Real-time device scanning with fallback demo devices
   const scanForDevices = async () => {
     setEarbudState(prev => ({ ...prev, isScanning: true }));
@@ -88,29 +130,25 @@ const EarbudControl = () => {
             return [...prev, newDevice];
           });
 
+          toast({
+            title: "Device Found",
+            description: `Found ${newDevice.name}`,
+          });
+
         } catch (bluetoothError) {
           console.log('Bluetooth access denied or cancelled:', bluetoothError);
-          toast({
-            title: "Bluetooth Access Denied",
-            description: "Grant permission to scan for devices.",
-            variant: "destructive",
-          });
+          // Add demo devices instead of showing error
+          addDemoDevices();
         }
       } else {
-        toast({
-          title: "Bluetooth Not Supported",
-          description: "Your browser doesn't support Bluetooth Web API.",
-          variant: "destructive",
-        });
+        // Browser doesn't support Bluetooth - add demo devices
+        addDemoDevices();
       }
 
     } catch (error) {
       console.error('Scan error:', error);
-      toast({
-        title: "Scan Failed",
-        description: "Unable to scan for devices.",
-        variant: "destructive",
-      });
+      // Fallback to demo devices on any error
+      addDemoDevices();
     } finally {
       // Add delay to show scanning animation
       setTimeout(() => {
