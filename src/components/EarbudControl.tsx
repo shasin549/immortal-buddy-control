@@ -95,6 +95,28 @@ const EarbudControl = () => {
       return;
     }
 
+    // Check if we're in a secure context (HTTPS or localhost)
+    if (!window.isSecureContext && window.location.protocol !== 'https:') {
+      toast({
+        title: "HTTPS Required",
+        description: "Web Bluetooth requires a secure connection (HTTPS). Try using the demo device instead.",
+        variant: "destructive",
+      });
+      addDemoDevice();
+      return;
+    }
+
+    // Check browser compatibility
+    if (!navigator.bluetooth) {
+      toast({
+        title: "Browser Not Supported",
+        description: "This browser doesn't support Web Bluetooth. Try Chrome, Edge, or Opera.",
+        variant: "destructive",
+      });
+      addDemoDevice();
+      return;
+    }
+
     setEarbudState(prev => ({ ...prev, isScanning: true }));
 
     try {
