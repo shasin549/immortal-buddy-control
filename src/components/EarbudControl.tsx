@@ -114,9 +114,9 @@ const EarbudControl = () => {
 
   if (currentView === 'settings') {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background glass-bg-animated">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border glass-surface backdrop-blur-md sticky top-0 z-10">
+        <div className="flex items-center justify-between p-4 border-b border-border glass-surface backdrop-blur-md sticky top-0 z-10 glass-shimmer">
           <Button 
             variant="ghost" 
             size="icon"
@@ -138,7 +138,7 @@ const EarbudControl = () => {
               <span className="text-sm text-muted-foreground">Treble</span>
             </div>
             
-            <div className="flex justify-between items-end h-64 px-4 glass-card glass-surface rounded-lg">
+            <div className="flex justify-between items-end h-64 px-4 glass-card glass-surface rounded-lg glass-shimmer">
               {equalizerState.sliders.map((value, index) => (
                 <div key={index} className="flex flex-col items-center h-full py-4">
                   <div className="flex-1 flex items-end pb-2">
@@ -240,9 +240,9 @@ const EarbudControl = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background glass-bg-animated">
       {/* Header */}
-      <div className="text-center p-6 space-y-4 glass-surface backdrop-blur-sm border-b border-glass-border">
+      <div className="text-center p-6 space-y-4 glass-surface backdrop-blur-sm border-b border-glass-border glass-shimmer">
         <h1 className="text-2xl font-bold text-foreground drop-shadow-lg">
           Manage Devices
         </h1>
@@ -260,7 +260,7 @@ const EarbudControl = () => {
         </div>
 
         {/* Main Device Card - boAt Immortal 161 */}
-        <Card className="p-6 glass-card glass-primary relative">
+        <Card className="p-6 glass-card glass-primary relative glass-shimmer">
           <div className="relative flex items-center justify-between">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
