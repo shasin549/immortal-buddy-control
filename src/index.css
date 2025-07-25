@@ -54,12 +54,26 @@ All colors MUST be HSL.
     --gradient-card: linear-gradient(145deg, hsl(230 35% 9%), hsl(230 20% 14%));
     --gradient-glow: radial-gradient(circle at center, hsl(217 91% 60% / 0.3), transparent);
 
+    /* Glassmorphism effects */
+    --glass-bg: hsl(230 35% 12% / 0.3);
+    --glass-border: hsl(217 91% 60% / 0.2);
+    --glass-highlight: hsl(0 0% 100% / 0.1);
+    --glass-shadow: 0 8px 32px hsl(230 35% 5% / 0.3);
+    --glass-backdrop-blur: blur(16px);
+
+    /* Enhanced gradients for glassmorphism */
+    --gradient-glass-primary: linear-gradient(135deg, hsl(217 91% 60% / 0.15), hsl(265 85% 70% / 0.1));
+    --gradient-glass-card: linear-gradient(145deg, hsl(230 35% 12% / 0.4), hsl(230 20% 18% / 0.2));
+    --gradient-glass-accent: linear-gradient(135deg, hsl(265 85% 70% / 0.2), hsl(217 91% 60% / 0.15));
+
     /* Shadows */
     --shadow-glow: 0 0 30px hsl(217 91% 60% / 0.3);
     --shadow-card: 0 8px 32px hsl(230 35% 5% / 0.5);
+    --shadow-glass: 0 8px 32px hsl(230 35% 5% / 0.3), inset 0 1px 0 hsl(0 0% 100% / 0.1);
 
     /* Animations */
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-glass: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 
     --radius: 0.5rem;
 
