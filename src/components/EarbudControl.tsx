@@ -116,7 +116,7 @@ const EarbudControl = () => {
     return (
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-border">
+        <div className="flex items-center justify-between p-4 border-b border-border glass-surface backdrop-blur-md sticky top-0 z-10">
           <Button 
             variant="ghost" 
             size="icon"
@@ -130,7 +130,7 @@ const EarbudControl = () => {
           </Button>
         </div>
 
-        <div className="p-6 space-y-8">
+        <div className="p-6 space-y-8 relative">
           {/* Equalizer */}
           <div className="space-y-6">
             <div className="flex justify-between items-center">
@@ -138,9 +138,9 @@ const EarbudControl = () => {
               <span className="text-sm text-muted-foreground">Treble</span>
             </div>
             
-            <div className="flex justify-between items-end h-64 px-4">
+            <div className="flex justify-between items-end h-64 px-4 glass-card glass-surface rounded-lg">
               {equalizerState.sliders.map((value, index) => (
-                <div key={index} className="flex flex-col items-center h-full">
+                <div key={index} className="flex flex-col items-center h-full py-4">
                   <div className="flex-1 flex items-end pb-2">
                     <Slider
                       value={[value]}
@@ -149,7 +149,7 @@ const EarbudControl = () => {
                       max={100}
                       step={1}
                       orientation="vertical"
-                      className="h-48 w-3"
+                      className="h-48 w-3 slider-glass"
                     />
                   </div>
                 </div>
@@ -240,12 +240,12 @@ const EarbudControl = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <div className="text-center p-6 space-y-4">
-        <h1 className="text-2xl font-bold text-foreground">
+      <div className="text-center p-6 space-y-4 glass-surface backdrop-blur-sm border-b border-glass-border">
+        <h1 className="text-2xl font-bold text-foreground drop-shadow-lg">
           Manage Devices
         </h1>
-        <p className="text-lg text-foreground">
-          Effortlessly<span className="text-primary">.</span>
+        <p className="text-lg text-foreground/90">
+          Effortlessly<span className="text-primary drop-shadow-sm">.</span>
         </p>
       </div>
 
