@@ -262,6 +262,10 @@ const EarbudControl = () => {
             <Badge variant="outline" className="glass-badge text-xs">
               {earbudState.isConnected ? "1 Connected" : "0 Connected"}
             </Badge>
+            {/* Debug indicator */}
+            <Badge variant="outline" className="text-xs bg-yellow-500/20">
+              Debug: {earbudState.isConnected ? "TRUE" : "FALSE"}
+            </Badge>
           </div>
           <Button variant="ghost" size="icon">
             <MoreVertical className="w-5 h-5" />
