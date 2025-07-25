@@ -609,29 +609,105 @@ const EarbudControl = () => {
         </div>
 
         <div className="p-6 space-y-8 relative">
-          {/* Equalizer */}
+          {/* Dolby-Style Equalizer */}
           <div className="space-y-6">
-            <div className="flex justify-between items-center px-4">
-              <span className="text-sm text-muted-foreground font-medium">Bass</span>
-              <span className="text-sm text-muted-foreground font-medium">Treble</span>
+            {/* Dolby Branding Header */}
+            <div className="text-center space-y-2">
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">D</span>
+                </div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                  DIGITAL PLUS
+                </h2>
+              </div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                Professional Audio Enhancement
+              </p>
             </div>
 
-            <div className="flex justify-between items-end h-64 px-6 py-6 glass-card glass-surface rounded-xl glass-shimmer">
-              {equalizerState.sliders.map((value, index) => (
-                <div key={index} className="flex flex-col items-center h-full">
-                  <div className="flex-1 flex items-end pb-4">
-                    <Slider
-                      value={[value]}
-                      onValueChange={(newValue) => handleEqualizerChange(index, newValue)}
-                      min={0}
-                      max={100}
-                      step={1}
-                      orientation="vertical"
-                      className="h-44 w-4 slider-glass"
-                    />
-                  </div>
-                </div>
-              ))}
+            {/* EQ Grid Background */}
+            <div className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 rounded-2xl p-8 border border-slate-700/50 backdrop-blur-xl">
+              {/* Grid Lines */}
+              <div className="absolute inset-8 opacity-20">
+                {/* Horizontal lines */}
+                {[...Array(9)].map((_, i) => (
+                  <div
+                    key={`h-${i}`}
+                    className="absolute w-full border-t border-slate-500/30"
+                    style={{ top: `${(i * 100) / 8}%` }}
+                  />
+                ))}
+                {/* Vertical lines */}
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={`v-${i}`}
+                    className="absolute h-full border-l border-slate-500/30"
+                    style={{ left: `${(i * 100) / 9}%` }}
+                  />
+                ))}
+              </div>
+
+              {/* dB Scale */}
+              <div className="absolute left-2 top-8 bottom-8 flex flex-col justify-between text-xs text-slate-400">
+                <span>+12</span>
+                <span>+6</span>
+                <span>0</span>
+                <span>-6</span>
+                <span>-12</span>
+              </div>
+
+              {/* Frequency Bands */}
+              <div className="flex justify-between items-end h-64 px-8 relative">
+                {equalizerState.sliders.map((value, index) => {
+                  const frequencies = ['32Hz', '64Hz', '125Hz', '250Hz', '500Hz', '1kHz', '2kHz', '4kHz', '8kHz', '16kHz'];
+                  const dbValue = ((value - 50) * 0.24).toFixed(1);
+
+                  return (
+                    <div key={index} className="flex flex-col items-center h-full group">
+                      {/* dB Value Display */}
+                      <div className="mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-red-500/90 text-white text-xs px-2 py-1 rounded font-mono">
+                          {dbValue > 0 ? '+' : ''}{dbValue}dB
+                        </div>
+                      </div>
+
+                      {/* Slider */}
+                      <div className="flex-1 flex items-end pb-4 relative">
+                        <Slider
+                          value={[value]}
+                          onValueChange={(newValue) => handleEqualizerChange(index, newValue)}
+                          min={0}
+                          max={100}
+                          step={1}
+                          orientation="vertical"
+                          className="h-44 w-6 dolby-slider"
+                        />
+
+                        {/* LED-style indicator */}
+                        <div
+                          className="absolute right-0 w-1 bg-gradient-to-t from-red-500 via-yellow-500 to-green-500 rounded-full transition-all duration-300"
+                          style={{
+                            height: `${(value / 100) * 176}px`,
+                            bottom: '16px',
+                            opacity: value > 50 ? 0.8 : 0.3
+                          }}
+                        />
+                      </div>
+
+                      {/* Frequency Label */}
+                      <div className="text-xs text-slate-300 font-mono mt-2 rotate-45 origin-center w-8">
+                        {frequencies[index]}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Center Line (0dB) */}
+              <div className="absolute left-8 right-8 border-t-2 border-red-500/60 top-1/2 pointer-events-none">
+                <div className="absolute -left-6 -top-3 text-xs text-red-400 font-bold">0dB</div>
+              </div>
             </div>
           </div>
 
