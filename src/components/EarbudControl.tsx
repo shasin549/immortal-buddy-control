@@ -205,9 +205,19 @@ const EarbudControl = () => {
       // Start battery monitoring
       startBatteryMonitoring(connectedDevice.id);
 
+      toast({
+        title: "Device Connected",
+        description: `Successfully connected to ${device.name}`,
+      });
+
     } catch (error) {
       console.error('Failed to connect:', error);
       setEarbudState(prev => ({ ...prev, isScanning: false }));
+      toast({
+        title: "Connection Failed",
+        description: `Failed to connect to ${device.name}`,
+        variant: "destructive",
+      });
     }
   };
 
