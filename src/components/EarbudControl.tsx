@@ -699,6 +699,12 @@ const EarbudControl = () => {
     setEqualizerState(prev => {
       const newState = { ...prev, volumeLeveller: checked };
       updateAudioControls(null, newState);
+
+      toast({
+        title: checked ? "Dolby Volume Leveller On" : "Dolby Volume Leveller Off",
+        description: checked ? "Dynamic range control active for consistent audio levels" : "Natural dynamic range preserved",
+      });
+
       return newState;
     });
   };
@@ -855,7 +861,7 @@ const EarbudControl = () => {
                   id: 'manual',
                   label: 'Custom',
                   description: 'Manual tuning',
-                  icon: '🎛��',
+                  icon: '🎛️',
                   gradient: 'from-slate-600 to-slate-700'
                 },
                 {
