@@ -1057,6 +1057,12 @@ const EarbudControl = () => {
           </>
         )}
 
+        {/* Hidden audio element for demo */}
+        <audio
+          ref={audioElementRef}
+          style={{ display: 'none' }}
+          preload="none"
+        />
 
       </div>
     </div>
