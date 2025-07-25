@@ -51,10 +51,14 @@ const EarbudControl = () => {
   };
 
   const toggleConnection = () => {
-    setEarbudState(prev => ({
-      ...prev,
-      isConnected: !prev.isConnected
-    }));
+    setEarbudState(prev => {
+      const newState = {
+        ...prev,
+        isConnected: !prev.isConnected
+      };
+      console.log('Connection state changing from', prev.isConnected, 'to', newState.isConnected);
+      return newState;
+    });
   };
 
   const toggleLeft = () => {
