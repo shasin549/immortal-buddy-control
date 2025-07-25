@@ -702,21 +702,29 @@ const EarbudControl = () => {
                   }`}
                   onClick={() => applyPreset(preset.id as EqualizerState['preset'])}
                 >
-                  <div className="flex flex-col items-center space-y-2 relative z-10">
-                    <div className="text-2xl">{preset.icon}</div>
+                  <div className="flex flex-col items-center space-y-3 relative z-10">
+                    <div className="text-3xl group-hover:scale-110 transition-transform duration-300">{preset.icon}</div>
                     <div className="text-center">
-                      <div className="font-semibold text-sm">{preset.label}</div>
-                      <div className="text-xs text-slate-400">{preset.description}</div>
+                      <div className="font-bold text-sm uppercase tracking-wide">{preset.label}</div>
+                      <div className="text-xs text-slate-400 font-medium">{preset.description}</div>
                     </div>
                   </div>
 
-                  {/* Active indicator */}
+                  {/* Enhanced Active indicator */}
                   {equalizerState.preset === preset.id && (
-                    <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                    <>
+                      <div className="absolute top-3 right-3 w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50" />
+                      <div className="absolute top-3 right-3 w-4 h-4 bg-red-400 rounded-full animate-ping" />
+                    </>
                   )}
 
-                  {/* Dolby shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  {/* Enhanced Dolby shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/15 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1200" />
+
+                  {/* Premium glow effect for active preset */}
+                  {equalizerState.preset === preset.id && (
+                    <div className={`absolute inset-0 bg-gradient-to-br ${preset.gradient}/10 rounded-lg animate-pulse`} />
+                  )}
                 </Button>
               ))}
             </div>
