@@ -380,12 +380,23 @@ const EarbudControl = () => {
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-semibold text-foreground">My Devices</h2>
             <Badge variant="outline" className="glass-badge text-xs">
-              {earbudState.isConnected ? "1 Connected" : "0 Connected"}
+              {connectedDevices.length} Connected
             </Badge>
           </div>
-          <Button variant="ghost" size="icon">
-            <MoreVertical className="w-5 h-5" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={scanForDevices}
+              disabled={earbudState.isScanning}
+              className="glass-button border-0"
+            >
+              <Scan className={`w-5 h-5 ${earbudState.isScanning ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button variant="ghost" size="icon">
+              <MoreVertical className="w-5 h-5" />
+            </Button>
+          </div>
         </div>
 
         {/* Main Device Card - boAt Immortal 161 */}
