@@ -436,6 +436,7 @@ const EarbudControl = () => {
   const handleEqualizerChange = (index: number, value: number[]) => {
     const newSliders = [...equalizerState.sliders];
     newSliders[index] = value[0];
+
     setEqualizerState(prev => {
       const newState = {
         ...prev,
@@ -443,6 +444,12 @@ const EarbudControl = () => {
         preset: 'manual'
       };
       updateAudioControls(null, newState);
+
+      // Provide feedback
+      const frequencies = ['32Hz', '64Hz', '125Hz', '250Hz', '500Hz', '1kHz', '2kHz', '4kHz', '8kHz', '16kHz'];
+      const dbValue = ((value[0] - 50) * 0.24).toFixed(1);
+      console.log(`EQ ${frequencies[index]}: ${dbValue > 0 ? '+' : ''}${dbValue}dB`);
+
       return newState;
     });
   };
