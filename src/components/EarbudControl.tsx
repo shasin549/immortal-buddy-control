@@ -399,60 +399,106 @@ const EarbudControl = () => {
           </div>
         </div>
 
-        {/* Main Device Card - boAt Immortal 161 */}
-        <Card className={`p-6 glass-card relative glass-shimmer transition-all duration-500 ${
-          earbudState.isConnected
-            ? 'glass-primary border-primary/40 shadow-glow'
-            : 'glass-surface border-border/30'
-        }`}>
-          <div className="relative flex items-center justify-between">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2">
-                {earbudState.isConnected ? (
-                  <BluetoothConnected className="w-4 h-4 text-primary animate-pulse" />
-                ) : (
-                  <Bluetooth className="w-4 h-4 text-muted-foreground" />
-                )}
-                <Badge
-                  variant={earbudState.isConnected ? "default" : "secondary"}
-                  className={`text-xs uppercase tracking-wide glass-badge border-0 transition-all duration-500 ${
-                    earbudState.isConnected ? 'bg-primary/20 text-primary' : ''
-                  }`}
-                >
-                  {earbudState.isConnected ? "Connected" : "Available"}
-                </Badge>
-              </div>
-              <h3 className="text-xl font-semibold text-foreground">boAt Immortal 161</h3>
-              
-              {earbudState.isConnected && (
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Battery className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">L: {earbudState.leftBattery}%</span>
+        {/* Available Devices */}
+        {availableDevices.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-medium text-foreground">Available Devices</h3>
+            {availableDevices.map((device) => (
+              <Card key={device.id} className="p-4 glass-card glass-surface">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Bluetooth className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <h4 className="font-medium text-foreground">{device.name}</h4>
+                      <p className="text-xs text-muted-foreground capitalize">{device.type}</p>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Battery className="w-4 h-4 text-muted-foreground" />
-                    <span className="text-sm text-muted-foreground">R: {earbudState.rightBattery}%</span>
-                  </div>
+                  <Button
+                    onClick={() => connectToDevice(device)}
+                    className="glass-button border-0"
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <Power className="w-4 h-4 mr-2" />
+                    Connect
+                  </Button>
                 </div>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              <img src={earbudsIcon} alt="boAt Immortal 161" className="w-20 h-20" />
-            </div>
+              </Card>
+            ))}
           </div>
-          
-          {!earbudState.isConnected && (
+        )}
+
+        {/* Connected Devices */}
+        {connectedDevices.map((device) => (
+          <Card key={device.id} className="p-6 glass-card glass-primary relative glass-shimmer border-primary/40 shadow-glow">
+            <div className="relative flex items-center justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <BluetoothConnected className="w-4 h-4 text-primary animate-pulse" />
+                  <Badge
+                    variant="default"
+                    className="text-xs uppercase tracking-wide glass-badge border-0 bg-primary/20 text-primary"
+                  >
+                    Connected
+                  </Badge>
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">{device.name}</h3>
+
+                {device.leftBattery && device.rightBattery && (
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Battery className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">L: {Math.round(device.leftBattery)}%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Battery className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">R: {Math.round(device.rightBattery)}%</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Bluetooth className="w-10 h-10 text-primary" />
+                </div>
+              </div>
+            </div>
+
             <Button
-              onClick={toggleConnection}
-              className="w-full mt-4 glass-button border-0"
-              variant="ghost"
+              onClick={() => disconnectDevice(device)}
+              variant="destructive"
+              className="w-full mt-4 glass-button border-0 bg-gradient-to-r from-destructive/80 to-destructive/60"
             >
               <Power className="w-4 h-4 mr-2" />
-              Connect Device
+              Disconnect
             </Button>
-          )}
-        </Card>
+          </Card>
+        ))}
+
+        {/* No devices message */}
+        {availableDevices.length === 0 && connectedDevices.length === 0 && !earbudState.isScanning && (
+          <Card className="p-8 glass-card glass-surface text-center">
+            <Bluetooth className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No Devices Found</h3>
+            <p className="text-muted-foreground mb-4">Click the scan button to discover nearby Bluetooth devices</p>
+            <Button
+              onClick={scanForDevices}
+              className="glass-button border-0"
+              variant="ghost"
+            >
+              <Scan className="w-4 h-4 mr-2" />
+              Scan for Devices
+            </Button>
+          </Card>
+        )}
+
+        {/* Scanning indicator */}
+        {earbudState.isScanning && (
+          <Card className="p-6 glass-card glass-accent text-center">
+            <Scan className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
+            <p className="text-foreground">Scanning for devices...</p>
+          </Card>
+        )}
 
         {earbudState.isConnected && (
           <>
