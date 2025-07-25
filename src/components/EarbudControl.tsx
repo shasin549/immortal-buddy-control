@@ -522,12 +522,12 @@ const EarbudControl = () => {
                         <div
                           className="h-full glass-progress-indicator"
                           style={{
-                            width: `${earbudState.leftBattery}%`,
-                            background: `linear-gradient(90deg, hsl(var(--${getBatteryColor(earbudState.leftBattery)})), hsl(var(--${getBatteryColor(earbudState.leftBattery)})) 50%, hsl(var(--${getBatteryColor(earbudState.leftBattery)}) / 0.8))`
+                            width: `${Math.round(earbudState.selectedDevice?.leftBattery || 0)}%`,
+                            background: `linear-gradient(90deg, hsl(var(--${getBatteryColor(earbudState.selectedDevice?.leftBattery || 0)})), hsl(var(--${getBatteryColor(earbudState.selectedDevice?.leftBattery || 0)})) 50%, hsl(var(--${getBatteryColor(earbudState.selectedDevice?.leftBattery || 0)}) / 0.8))`
                           }}
                         />
                       </div>
-                      <span className="text-xs text-muted-foreground">{earbudState.leftBattery}%</span>
+                      <span className="text-xs text-muted-foreground">{Math.round(earbudState.selectedDevice?.leftBattery || 0)}%</span>
                     </div>
                   </div>
                 </div>
