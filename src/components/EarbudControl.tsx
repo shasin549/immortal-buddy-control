@@ -301,10 +301,33 @@ const EarbudControl = () => {
 
   const toggleLeft = () => {
     setEarbudState(prev => {
+      const newLeftEnabled = !prev.leftEnabled;
       const newState = {
         ...prev,
-        leftEnabled: !prev.leftEnabled
+        leftEnabled: newLeftEnabled
       };
+
+      // Show battery drain when disabling
+      if (!newLeftEnabled && prev.selectedDevice) {
+        const updatedDevice = {
+          ...prev.selectedDevice,
+          leftBattery: Math.max(0, (prev.selectedDevice.leftBattery || 85) - 5)
+        };
+        setConnectedDevices(devices =>
+          devices.map(d => d.id === updatedDevice.id ? updatedDevice : d)
+        );
+
+        toast({
+          title: "Left Earbud Disabled",
+          description: "Left earbud powered off. Battery conserved.",
+        });
+      } else if (newLeftEnabled) {
+        toast({
+          title: "Left Earbud Enabled",
+          description: "Left earbud powered on.",
+        });
+      }
+
       updateAudioControls(newState);
       return newState;
     });
@@ -312,10 +335,33 @@ const EarbudControl = () => {
 
   const toggleRight = () => {
     setEarbudState(prev => {
+      const newRightEnabled = !prev.rightEnabled;
       const newState = {
         ...prev,
-        rightEnabled: !prev.rightEnabled
+        rightEnabled: newRightEnabled
       };
+
+      // Show battery drain when disabling
+      if (!newRightEnabled && prev.selectedDevice) {
+        const updatedDevice = {
+          ...prev.selectedDevice,
+          rightBattery: Math.max(0, (prev.selectedDevice.rightBattery || 78) - 5)
+        };
+        setConnectedDevices(devices =>
+          devices.map(d => d.id === updatedDevice.id ? updatedDevice : d)
+        );
+
+        toast({
+          title: "Right Earbud Disabled",
+          description: "Right earbud powered off. Battery conserved.",
+        });
+      } else if (newRightEnabled) {
+        toast({
+          title: "Right Earbud Enabled",
+          description: "Right earbud powered on.",
+        });
+      }
+
       updateAudioControls(newState);
       return newState;
     });
