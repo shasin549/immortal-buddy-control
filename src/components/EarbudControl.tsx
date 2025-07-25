@@ -1014,15 +1014,46 @@ const EarbudControl = () => {
               </div>
             </Card>
 
-            {/* Audio Settings Button */}
-            <Button
-              onClick={() => setCurrentView('settings')}
-              className="w-full mt-6 h-12 glass-button border-0"
-              variant="ghost"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Custom Audio Settings
-            </Button>
+            {/* Audio Controls */}
+            <div className="space-y-3 mt-6">
+              <div className="flex gap-3">
+                {!isPlayingDemo ? (
+                  <Button
+                    onClick={startDemoAudio}
+                    className="flex-1 h-12 glass-button border-0"
+                    variant="ghost"
+                  >
+                    <Volume2 className="w-4 h-4 mr-2" />
+                    Test Audio Controls
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={stopDemoAudio}
+                    className="flex-1 h-12 glass-button border-0 bg-destructive/20"
+                    variant="ghost"
+                  >
+                    <Power className="w-4 h-4 mr-2" />
+                    Stop Demo Audio
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setCurrentView('settings')}
+                  className="flex-1 h-12 glass-button border-0"
+                  variant="ghost"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Equalizer
+                </Button>
+              </div>
+
+              {isAudioInitialized && (
+                <div className="text-center">
+                  <Badge variant="outline" className="text-xs glass-badge bg-primary/20 text-primary">
+                    Audio Controls Active
+                  </Badge>
+                </div>
+              )}
+            </div>
           </>
         )}
 
