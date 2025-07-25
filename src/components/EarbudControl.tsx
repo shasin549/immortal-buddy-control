@@ -757,41 +757,84 @@ const EarbudControl = () => {
             </div>
           </div>
 
-          {/* Profile Settings */}
+          {/* Dolby Enhancement Features */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-foreground">Profile settings</h3>
-            
-            <Card className="p-4 glass-card glass-surface">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h4 className="font-medium text-foreground">Surround Virtualiser</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Create a surround sound experience through your connected device
-                  </p>
-                </div>
-                <Switch
-                  checked={equalizerState.surroundVirtualiser}
-                  onCheckedChange={handleSurroundVirtualiserChange}
-                  className="glass-switch"
-                />
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold">+</span>
               </div>
-            </Card>
+              <h3 className="text-lg font-medium text-foreground">Enhancement Suite</h3>
+            </div>
 
-            <Card className="p-4 glass-card glass-surface">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h4 className="font-medium text-foreground">Volume leveller</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Hear the same volume level for each audio source
-                  </p>
+            <div className="space-y-4">
+              {/* Surround Virtualizer */}
+              <Card className="p-6 bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                        <span className="text-white text-xs">🎭</span>
+                      </div>
+                      <h4 className="font-semibold text-foreground">Spatial Virtualizer</h4>
+                    </div>
+                    <p className="text-sm text-slate-400 ml-10">
+                      Advanced 3D audio processing for immersive surround sound experience
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <Switch
+                      checked={equalizerState.surroundVirtualiser}
+                      onCheckedChange={handleSurroundVirtualiserChange}
+                      className="dolby-switch"
+                    />
+                    <span className="text-xs text-slate-400">
+                      {equalizerState.surroundVirtualiser ? 'ON' : 'OFF'}
+                    </span>
+                  </div>
                 </div>
-                <Switch
-                  checked={equalizerState.volumeLeveller}
-                  onCheckedChange={handleVolumeLevellerChange}
-                  className="glass-switch"
-                />
-              </div>
-            </Card>
+
+                {/* Feature indicator */}
+                <div className={`mt-4 h-1 rounded-full transition-all duration-500 ${
+                  equalizerState.surroundVirtualiser
+                    ? 'bg-gradient-to-r from-purple-500 to-blue-500 shadow-lg shadow-purple-500/30'
+                    : 'bg-slate-600/50'
+                }`} />
+              </Card>
+
+              {/* Volume Leveller */}
+              <Card className="p-6 bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                        <span className="text-white text-xs">📊</span>
+                      </div>
+                      <h4 className="font-semibold text-foreground">Dynamic Range Control</h4>
+                    </div>
+                    <p className="text-sm text-slate-400 ml-10">
+                      Intelligent compression for consistent volume across all content
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <Switch
+                      checked={equalizerState.volumeLeveller}
+                      onCheckedChange={handleVolumeLevellerChange}
+                      className="dolby-switch"
+                    />
+                    <span className="text-xs text-slate-400">
+                      {equalizerState.volumeLeveller ? 'ON' : 'OFF'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Feature indicator */}
+                <div className={`mt-4 h-1 rounded-full transition-all duration-500 ${
+                  equalizerState.volumeLeveller
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
+                    : 'bg-slate-600/50'
+                }`} />
+              </Card>
+            </div>
           </div>
         </div>
       </div>
