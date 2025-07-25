@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { audioEngine, AudioControlState } from "@/lib/audioEngine";
 import { Bluetooth, BluetoothConnected, Battery, Volume2, Power, MoreVertical, ArrowLeft, Settings, Scan, Trash2, RefreshCw, Info } from "lucide-react";
 
 interface BluetoothDevice {
@@ -38,6 +39,9 @@ interface EqualizerState {
 
 const EarbudControl = () => {
   const { toast } = useToast();
+  const audioElementRef = useRef<HTMLAudioElement>(null);
+  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+  const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const [currentView, setCurrentView] = useState<'devices' | 'settings'>('devices');
   const [availableDevices, setAvailableDevices] = useState<BluetoothDevice[]>([]);
   const [connectedDevices, setConnectedDevices] = useState<BluetoothDevice[]>([]);
@@ -183,6 +187,9 @@ const EarbudControl = () => {
       // Simulate connection process
       setEarbudState(prev => ({ ...prev, isScanning: true }));
 
+      // Initialize audio engine when connecting
+      await initializeAudioEngine();
+
       // In real implementation, this would connect to the actual device
       await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -222,6 +229,10 @@ const EarbudControl = () => {
   };
 
   const disconnectDevice = (device: BluetoothDevice) => {
+    // Disconnect audio engine
+    audioEngine.disconnect();
+    setIsAudioInitialized(false);
+    setIsPlayingDemo(false);
     const disconnectedDevice: BluetoothDevice = {
       ...device,
       isConnected: false,
@@ -281,39 +292,55 @@ const EarbudControl = () => {
   };
 
   const toggleLeft = () => {
-    setEarbudState(prev => ({
-      ...prev,
-      leftEnabled: !prev.leftEnabled
-    }));
+    setEarbudState(prev => {
+      const newState = {
+        ...prev,
+        leftEnabled: !prev.leftEnabled
+      };
+      updateAudioControls(newState);
+      return newState;
+    });
   };
 
   const toggleRight = () => {
-    setEarbudState(prev => ({
-      ...prev,
-      rightEnabled: !prev.rightEnabled
-    }));
+    setEarbudState(prev => {
+      const newState = {
+        ...prev,
+        rightEnabled: !prev.rightEnabled
+      };
+      updateAudioControls(newState);
+      return newState;
+    });
   };
 
   const handleBalanceChange = (value: number[]) => {
-    setEarbudState(prev => ({
-      ...prev,
-      audioBalance: value[0]
-    }));
+    setEarbudState(prev => {
+      const newState = {
+        ...prev,
+        audioBalance: value[0]
+      };
+      updateAudioControls(newState);
+      return newState;
+    });
   };
 
   const handleEqualizerChange = (index: number, value: number[]) => {
     const newSliders = [...equalizerState.sliders];
     newSliders[index] = value[0];
-    setEqualizerState(prev => ({
-      ...prev,
-      sliders: newSliders,
-      preset: 'manual'
-    }));
+    setEqualizerState(prev => {
+      const newState = {
+        ...prev,
+        sliders: newSliders,
+        preset: 'manual'
+      };
+      updateAudioControls(null, newState);
+      return newState;
+    });
   };
 
   const applyPreset = (preset: EqualizerState['preset']) => {
     let newSliders = [...equalizerState.sliders];
-    
+
     switch (preset) {
       case 'brilliant-treble':
         newSliders = [40, 45, 50, 55, 60, 65, 70, 75, 80, 85];
@@ -327,12 +354,240 @@ const EarbudControl = () => {
       default:
         return;
     }
-    
-    setEqualizerState(prev => ({
-      ...prev,
-      sliders: newSliders,
-      preset
-    }));
+
+    setEqualizerState(prev => {
+      const newState = {
+        ...prev,
+        sliders: newSliders,
+        preset
+      };
+      updateAudioControls(null, newState);
+      return newState;
+    });
+  };
+
+  // Audio engine integration functions
+  const initializeAudioEngine = async () => {
+    if (isAudioInitialized) return;
+
+    try {
+      await audioEngine.initialize();
+      setIsAudioInitialized(true);
+
+      toast({
+        title: "Audio System Ready",
+        description: "You can now use audio controls with any playing audio.",
+      });
+    } catch (error) {
+      console.error('Failed to initialize audio:', error);
+      toast({
+        title: "Audio Initialization Failed",
+        description: "Audio controls may not work properly.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const updateAudioControls = (earbudStateOverride?: Partial<EarbudState>, equalizerStateOverride?: Partial<EqualizerState>) => {
+    if (!isAudioInitialized) return;
+
+    const currentEarbudState = earbudStateOverride ? { ...earbudState, ...earbudStateOverride } : earbudState;
+    const currentEqualizerState = equalizerStateOverride ? { ...equalizerState, ...equalizerStateOverride } : equalizerState;
+
+    const audioControlState: AudioControlState = {
+      leftEnabled: currentEarbudState.leftEnabled,
+      rightEnabled: currentEarbudState.rightEnabled,
+      audioBalance: currentEarbudState.audioBalance,
+      equalizerBands: currentEqualizerState.sliders,
+      surroundVirtualiser: currentEqualizerState.surroundVirtualiser,
+      volumeLeveller: currentEqualizerState.volumeLeveller,
+    };
+
+    audioEngine.updateControls(audioControlState);
+  };
+
+  const startDemoAudio = async () => {
+    try {
+      if (!isAudioInitialized) {
+        await initializeAudioEngine();
+      }
+
+      // Try to find an existing audio element on the page first
+      const existingAudio = document.querySelector('audio') as HTMLAudioElement;
+
+      if (existingAudio && existingAudio.src) {
+        await audioEngine.connectToAudioElement(existingAudio);
+        updateAudioControls();
+
+        toast({
+          title: "Connected to Existing Audio",
+          description: "Audio controls are now active for the current audio source.",
+        });
+        return;
+      }
+
+      // Create demo audio with online test audio
+      const audio = audioElementRef.current || document.createElement('audio');
+      audio.crossOrigin = 'anonymous';
+      audio.loop = true;
+      audio.volume = 0.3;
+
+      // Use a test audio file
+      audio.src = 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav';
+
+      // Fallback to local oscillator if external audio fails
+      const playDemo = async () => {
+        try {
+          await audio.play();
+          await audioEngine.connectToAudioElement(audio);
+          updateAudioControls();
+          setIsPlayingDemo(true);
+
+          toast({
+            title: "Demo Audio Started",
+            description: "Test audio is playing. Try the controls to hear the difference!",
+          });
+        } catch (playError) {
+          // If external audio fails, create an oscillator demo
+          createOscillatorDemo();
+        }
+      };
+
+      audio.addEventListener('canplaythrough', playDemo, { once: true });
+      audio.addEventListener('error', () => createOscillatorDemo(), { once: true });
+
+      audio.load();
+
+    } catch (error) {
+      console.error('Failed to start demo audio:', error);
+      createOscillatorDemo();
+    }
+  };
+
+  const createOscillatorDemo = async () => {
+    try {
+      if (!audioEngine.getAudioContext()) {
+        await audioEngine.initialize();
+      }
+
+      const audioContext = audioEngine.getAudioContext();
+      if (!audioContext) return;
+
+      // Create demo tones
+      const oscillator1 = audioContext.createOscillator();
+      const oscillator2 = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator1.type = 'sine';
+      oscillator1.frequency.value = 440; // A4
+      oscillator2.type = 'sine';
+      oscillator2.frequency.value = 554.37; // C#5
+
+      gainNode.gain.value = 0.1;
+
+      // Create a simple audio element that we can connect to
+      const audio = document.createElement('audio');
+      const mediaStreamDestination = audioContext.createMediaStreamDestination();
+
+      oscillator1.connect(gainNode);
+      oscillator2.connect(gainNode);
+      gainNode.connect(mediaStreamDestination);
+
+      audio.srcObject = mediaStreamDestination.stream;
+      audio.loop = true;
+
+      oscillator1.start();
+      oscillator2.start();
+
+      await audio.play();
+      await audioEngine.connectToAudioElement(audio);
+      updateAudioControls();
+      setIsPlayingDemo(true);
+
+      toast({
+        title: "Demo Tones Started",
+        description: "Test tones are playing. Try the controls!",
+      });
+
+      // Stop after 30 seconds
+      setTimeout(() => {
+        oscillator1.stop();
+        oscillator2.stop();
+        setIsPlayingDemo(false);
+      }, 30000);
+
+    } catch (error) {
+      toast({
+        title: "Demo Audio Failed",
+        description: "Could not create demo audio. Controls will work with any audio playing on the page.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const stopDemoAudio = () => {
+    const audio = audioEngine.getCurrentAudioElement();
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
+    audioEngine.disconnect();
+    setIsPlayingDemo(false);
+    setIsAudioInitialized(false);
+
+    toast({
+      title: "Demo Audio Stopped",
+      description: "Audio controls are now inactive.",
+    });
+  };
+
+  // Auto-detect and connect to any audio playing on the page
+  useEffect(() => {
+    const connectToPageAudio = async () => {
+      if (!earbudState.selectedDevice || isPlayingDemo) return;
+
+      const audioElements = document.querySelectorAll('audio, video');
+      for (const element of audioElements) {
+        const mediaElement = element as HTMLAudioElement | HTMLVideoElement;
+        if (!mediaElement.paused && mediaElement.currentTime > 0) {
+          try {
+            if (!isAudioInitialized) {
+              await initializeAudioEngine();
+            }
+            await audioEngine.connectToAudioElement(mediaElement);
+            updateAudioControls();
+
+            toast({
+              title: "Connected to Page Audio",
+              description: "Audio controls are now active for the playing media.",
+            });
+            break;
+          } catch (error) {
+            console.error('Failed to connect to page audio:', error);
+          }
+        }
+      }
+    };
+
+    const interval = setInterval(connectToPageAudio, 2000);
+    return () => clearInterval(interval);
+  }, [earbudState.selectedDevice, isPlayingDemo, isAudioInitialized]);
+
+  // Update audio controls when equalizer settings change
+  const handleSurroundVirtualiserChange = (checked: boolean) => {
+    setEqualizerState(prev => {
+      const newState = { ...prev, surroundVirtualiser: checked };
+      updateAudioControls(null, newState);
+      return newState;
+    });
+  };
+
+  const handleVolumeLevellerChange = (checked: boolean) => {
+    setEqualizerState(prev => {
+      const newState = { ...prev, volumeLeveller: checked };
+      updateAudioControls(null, newState);
+      return newState;
+    });
   };
 
   if (currentView === 'settings') {
@@ -354,108 +609,232 @@ const EarbudControl = () => {
         </div>
 
         <div className="p-6 space-y-8 relative">
-          {/* Equalizer */}
+          {/* Dolby-Style Equalizer */}
           <div className="space-y-6">
-            <div className="flex justify-between items-center px-4">
-              <span className="text-sm text-muted-foreground font-medium">Bass</span>
-              <span className="text-sm text-muted-foreground font-medium">Treble</span>
+            {/* Dolby Branding Header */}
+            <div className="text-center space-y-2">
+              <div className="flex items-center justify-center gap-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-xs font-bold">D</span>
+                </div>
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
+                  DIGITAL PLUS
+                </h2>
+              </div>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
+                Professional Audio Enhancement
+              </p>
             </div>
 
-            <div className="flex justify-between items-end h-64 px-6 py-6 glass-card glass-surface rounded-xl glass-shimmer">
-              {equalizerState.sliders.map((value, index) => (
-                <div key={index} className="flex flex-col items-center h-full">
-                  <div className="flex-1 flex items-end pb-4">
-                    <Slider
-                      value={[value]}
-                      onValueChange={(newValue) => handleEqualizerChange(index, newValue)}
-                      min={0}
-                      max={100}
-                      step={1}
-                      orientation="vertical"
-                      className="h-44 w-4 slider-glass"
-                    />
-                  </div>
-                </div>
-              ))}
+            {/* EQ Grid Background */}
+            <div className="relative bg-gradient-to-br from-slate-900/90 to-slate-800/90 rounded-2xl p-8 border border-slate-700/50 backdrop-blur-xl">
+              {/* Grid Lines */}
+              <div className="absolute inset-8 opacity-20">
+                {/* Horizontal lines */}
+                {[...Array(9)].map((_, i) => (
+                  <div
+                    key={`h-${i}`}
+                    className="absolute w-full border-t border-slate-500/30"
+                    style={{ top: `${(i * 100) / 8}%` }}
+                  />
+                ))}
+                {/* Vertical lines */}
+                {[...Array(10)].map((_, i) => (
+                  <div
+                    key={`v-${i}`}
+                    className="absolute h-full border-l border-slate-500/30"
+                    style={{ left: `${(i * 100) / 9}%` }}
+                  />
+                ))}
+              </div>
+
+              {/* dB Scale */}
+              <div className="absolute left-2 top-8 bottom-8 flex flex-col justify-between text-xs text-slate-400">
+                <span>+12</span>
+                <span>+6</span>
+                <span>0</span>
+                <span>-6</span>
+                <span>-12</span>
+              </div>
+
+              {/* Frequency Bands */}
+              <div className="flex justify-between items-end h-64 px-8 relative">
+                {equalizerState.sliders.map((value, index) => {
+                  const frequencies = ['32Hz', '64Hz', '125Hz', '250Hz', '500Hz', '1kHz', '2kHz', '4kHz', '8kHz', '16kHz'];
+                  const dbValue = ((value - 50) * 0.24).toFixed(1);
+
+                  return (
+                    <div key={index} className="flex flex-col items-center h-full group">
+                      {/* dB Value Display */}
+                      <div className="mb-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-red-500/90 text-white text-xs px-2 py-1 rounded font-mono">
+                          {dbValue > 0 ? '+' : ''}{dbValue}dB
+                        </div>
+                      </div>
+
+                      {/* Slider */}
+                      <div className="flex-1 flex items-end pb-4 relative">
+                        <Slider
+                          value={[value]}
+                          onValueChange={(newValue) => handleEqualizerChange(index, newValue)}
+                          min={0}
+                          max={100}
+                          step={1}
+                          orientation="vertical"
+                          className="h-44 w-6 dolby-slider"
+                        />
+
+                        {/* LED-style indicator */}
+                        <div
+                          className="absolute right-0 w-1 bg-gradient-to-t from-red-500 via-yellow-500 to-green-500 rounded-full transition-all duration-300"
+                          style={{
+                            height: `${(value / 100) * 176}px`,
+                            bottom: '16px',
+                            opacity: value > 50 ? 0.8 : 0.3
+                          }}
+                        />
+                      </div>
+
+                      {/* Frequency Label */}
+                      <div className="text-xs text-slate-300 font-mono mt-2 rotate-45 origin-center w-8">
+                        {frequencies[index]}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Center Line (0dB) */}
+              <div className="absolute left-8 right-8 border-t-2 border-red-500/60 top-1/2 pointer-events-none">
+                <div className="absolute -left-6 -top-3 text-xs text-red-400 font-bold">0dB</div>
+              </div>
             </div>
           </div>
 
-          {/* Equalizer Presets */}
+          {/* Dolby Audio Presets */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-foreground">Choose equaliser</h3>
-            <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold">∿</span>
+              </div>
+              <h3 className="text-lg font-medium text-foreground">Audio Profiles</h3>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               {[
-                { id: 'manual', label: 'Manual' },
-                { id: 'brilliant-treble', label: 'Brilliant treble' },
-                { id: 'bass-boost', label: 'Bass boost' },
-                { id: 'vocal-boost', label: 'Vocal boost' }
+                { id: 'manual', label: 'Manual', description: 'Custom tuning', icon: '⚙️' },
+                { id: 'brilliant-treble', label: 'Crisp', description: 'Enhanced clarity', icon: '💎' },
+                { id: 'bass-boost', label: 'Deep', description: 'Rich bass', icon: '🎵' },
+                { id: 'vocal-boost', label: 'Voice', description: 'Clear dialogue', icon: '🎤' }
               ].map((preset) => (
                 <Button
                   key={preset.id}
                   variant="ghost"
-                  className={`w-full justify-start h-12 text-left transition-all duration-300 hover:glass-card ${
+                  className={`h-20 p-4 transition-all duration-300 relative overflow-hidden ${
                     equalizerState.preset === preset.id
-                      ? 'glass-card glass-primary border border-primary/30'
-                      : 'hover:bg-glass-bg hover:backdrop-blur-sm'
+                      ? 'bg-gradient-to-br from-red-500/20 to-orange-500/20 border-2 border-red-500/50 shadow-lg shadow-red-500/20'
+                      : 'bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 hover:border-red-500/30'
                   }`}
                   onClick={() => applyPreset(preset.id as EqualizerState['preset'])}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      equalizerState.preset === preset.id 
-                        ? 'border-primary bg-primary' 
-                        : 'border-muted-foreground'
-                    }`}>
-                      {equalizerState.preset === preset.id && (
-                        <div className="w-2 h-2 rounded-full bg-primary-foreground" />
-                      )}
+                  <div className="flex flex-col items-center space-y-2 relative z-10">
+                    <div className="text-2xl">{preset.icon}</div>
+                    <div className="text-center">
+                      <div className="font-semibold text-sm">{preset.label}</div>
+                      <div className="text-xs text-slate-400">{preset.description}</div>
                     </div>
-                    <span className="text-foreground">{preset.label}</span>
                   </div>
+
+                  {/* Active indicator */}
+                  {equalizerState.preset === preset.id && (
+                    <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                  )}
+
+                  {/* Dolby shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </Button>
               ))}
             </div>
           </div>
 
-          {/* Profile Settings */}
+          {/* Dolby Enhancement Features */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-foreground">Profile settings</h3>
-            
-            <Card className="p-4 glass-card glass-surface">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h4 className="font-medium text-foreground">Surround Virtualiser</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Create a surround sound experience through your connected device
-                  </p>
-                </div>
-                <Switch
-                  checked={equalizerState.surroundVirtualiser}
-                  onCheckedChange={(checked) =>
-                    setEqualizerState(prev => ({ ...prev, surroundVirtualiser: checked }))
-                  }
-                  className="glass-switch"
-                />
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold">+</span>
               </div>
-            </Card>
+              <h3 className="text-lg font-medium text-foreground">Enhancement Suite</h3>
+            </div>
 
-            <Card className="p-4 glass-card glass-surface">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h4 className="font-medium text-foreground">Volume leveller</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Hear the same volume level for each audio source
-                  </p>
+            <div className="space-y-4">
+              {/* Surround Virtualizer */}
+              <Card className="p-6 bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
+                        <span className="text-white text-xs">🎭</span>
+                      </div>
+                      <h4 className="font-semibold text-foreground">Spatial Virtualizer</h4>
+                    </div>
+                    <p className="text-sm text-slate-400 ml-10">
+                      Advanced 3D audio processing for immersive surround sound experience
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <Switch
+                      checked={equalizerState.surroundVirtualiser}
+                      onCheckedChange={handleSurroundVirtualiserChange}
+                      className="dolby-switch"
+                    />
+                    <span className="text-xs text-slate-400">
+                      {equalizerState.surroundVirtualiser ? 'ON' : 'OFF'}
+                    </span>
+                  </div>
                 </div>
-                <Switch
-                  checked={equalizerState.volumeLeveller}
-                  onCheckedChange={(checked) =>
-                    setEqualizerState(prev => ({ ...prev, volumeLeveller: checked }))
-                  }
-                  className="glass-switch"
-                />
-              </div>
-            </Card>
+
+                {/* Feature indicator */}
+                <div className={`mt-4 h-1 rounded-full transition-all duration-500 ${
+                  equalizerState.surroundVirtualiser
+                    ? 'bg-gradient-to-r from-purple-500 to-blue-500 shadow-lg shadow-purple-500/30'
+                    : 'bg-slate-600/50'
+                }`} />
+              </Card>
+
+              {/* Volume Leveller */}
+              <Card className="p-6 bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl">
+                <div className="flex items-center justify-between">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
+                        <span className="text-white text-xs">📊</span>
+                      </div>
+                      <h4 className="font-semibold text-foreground">Dynamic Range Control</h4>
+                    </div>
+                    <p className="text-sm text-slate-400 ml-10">
+                      Intelligent compression for consistent volume across all content
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-center gap-2">
+                    <Switch
+                      checked={equalizerState.volumeLeveller}
+                      onCheckedChange={handleVolumeLevellerChange}
+                      className="dolby-switch"
+                    />
+                    <span className="text-xs text-slate-400">
+                      {equalizerState.volumeLeveller ? 'ON' : 'OFF'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Feature indicator */}
+                <div className={`mt-4 h-1 rounded-full transition-all duration-500 ${
+                  equalizerState.volumeLeveller
+                    ? 'bg-gradient-to-r from-green-500 to-emerald-500 shadow-lg shadow-green-500/30'
+                    : 'bg-slate-600/50'
+                }`} />
+              </Card>
+            </div>
           </div>
         </div>
       </div>
@@ -763,18 +1142,55 @@ const EarbudControl = () => {
               </div>
             </Card>
 
-            {/* Audio Settings Button */}
-            <Button
-              onClick={() => setCurrentView('settings')}
-              className="w-full mt-6 h-12 glass-button border-0"
-              variant="ghost"
-            >
-              <Settings className="w-4 h-4 mr-2" />
-              Custom Audio Settings
-            </Button>
+            {/* Audio Controls */}
+            <div className="space-y-3 mt-6">
+              <div className="flex gap-3">
+                {!isPlayingDemo ? (
+                  <Button
+                    onClick={startDemoAudio}
+                    className="flex-1 h-12 glass-button border-0"
+                    variant="ghost"
+                  >
+                    <Volume2 className="w-4 h-4 mr-2" />
+                    Test Audio Controls
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={stopDemoAudio}
+                    className="flex-1 h-12 glass-button border-0 bg-destructive/20"
+                    variant="ghost"
+                  >
+                    <Power className="w-4 h-4 mr-2" />
+                    Stop Demo Audio
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setCurrentView('settings')}
+                  className="flex-1 h-12 glass-button border-0"
+                  variant="ghost"
+                >
+                  <Settings className="w-4 h-4 mr-2" />
+                  Equalizer
+                </Button>
+              </div>
+
+              {isAudioInitialized && (
+                <div className="text-center">
+                  <Badge variant="outline" className="text-xs glass-badge bg-primary/20 text-primary">
+                    Audio Controls Active
+                  </Badge>
+                </div>
+              )}
+            </div>
           </>
         )}
 
+        {/* Hidden audio element for demo */}
+        <audio
+          ref={audioElementRef}
+          style={{ display: 'none' }}
+          preload="none"
+        />
 
       </div>
     </div>
