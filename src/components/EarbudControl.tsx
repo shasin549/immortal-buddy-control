@@ -231,6 +231,16 @@ const EarbudControl = () => {
     return "battery-critical";
   };
 
+  const clearAllDevices = () => {
+    setAvailableDevices([]);
+    setConnectedDevices([]);
+    setEarbudState(prev => ({
+      ...prev,
+      selectedDevice: null,
+      isScanning: false
+    }));
+  };
+
   const toggleLeft = () => {
     setEarbudState(prev => ({
       ...prev,
