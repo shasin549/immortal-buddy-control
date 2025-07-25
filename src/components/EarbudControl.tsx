@@ -36,14 +36,14 @@ interface EqualizerState {
 
 const EarbudControl = () => {
   const [currentView, setCurrentView] = useState<'devices' | 'settings'>('devices');
+  const [availableDevices, setAvailableDevices] = useState<BluetoothDevice[]>([]);
+  const [connectedDevices, setConnectedDevices] = useState<BluetoothDevice[]>([]);
   const [earbudState, setEarbudState] = useState<EarbudState>({
-    isConnected: false, // Start disconnected to test connection flow
+    selectedDevice: null,
     leftEnabled: true,
     rightEnabled: true,
-    leftBattery: 85,
-    rightBattery: 92,
-    caseBattery: 67,
     audioBalance: 0,
+    isScanning: false,
   });
 
   const [equalizerState, setEqualizerState] = useState<EqualizerState>({
