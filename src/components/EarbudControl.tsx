@@ -256,6 +256,14 @@ const EarbudControl = () => {
     setIsAudioInitialized(false);
     setIsPlayingDemo(false);
 
+    // Stop battery monitoring
+    const deviceIntervals = JSON.parse(sessionStorage.getItem('batteryIntervals') || '{}');
+    if (deviceIntervals[device.id]) {
+      clearInterval(deviceIntervals[device.id]);
+      delete deviceIntervals[device.id];
+      sessionStorage.setItem('batteryIntervals', JSON.stringify(deviceIntervals));
+    }
+
     const disconnectedDevice: BluetoothDevice = {
       ...device,
       isConnected: false,
@@ -278,8 +286,44 @@ const EarbudControl = () => {
   };
 
   const startBatteryMonitoring = (deviceId: string) => {
-    // Battery monitoring would be implemented with real device API
-    console.log(`Starting battery monitoring for device: ${deviceId}`);
+    // Simulate realistic battery monitoring
+    const interval = setInterval(() => {
+      setConnectedDevices(devices =>
+        devices.map(device => {
+          if (device.id === deviceId) {
+            // Simulate slow battery drain during use
+            const leftDrain = earbudState.leftEnabled ? 0.1 : 0.05;
+            const rightDrain = earbudState.rightEnabled ? 0.1 : 0.05;
+            const caseDrain = 0.02; // Case drains slowly
+
+            const updatedDevice = {
+              ...device,
+              leftBattery: Math.max(0, (device.leftBattery || 85) - leftDrain),
+              rightBattery: Math.max(0, (device.rightBattery || 78) - rightDrain),
+              caseBattery: Math.max(0, (device.caseBattery || 92) - caseDrain)
+            };
+
+            // Update selected device if it matches
+            if (earbudState.selectedDevice?.id === deviceId) {
+              setEarbudState(prev => ({
+                ...prev,
+                selectedDevice: updatedDevice
+              }));
+            }
+
+            return updatedDevice;
+          }
+          return device;
+        })
+      );
+    }, 10000); // Update every 10 seconds
+
+    // Store interval for cleanup
+    const deviceIntervals = JSON.parse(sessionStorage.getItem('batteryIntervals') || '{}');
+    deviceIntervals[deviceId] = interval;
+    sessionStorage.setItem('batteryIntervals', JSON.stringify(deviceIntervals));
+
+    console.log(`Started battery monitoring for device: ${deviceId}`);
   };
 
   const getBatteryColor = (level: number) => {
