@@ -1282,23 +1282,48 @@ const EarbudControl = () => {
             {/* Charging Case */}
             <Card className="p-4 glass-card glass-surface">
               <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Battery className="w-5 h-5 text-primary" />
-                  <h3 className="font-medium text-foreground">Charging Case</h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Battery className="w-5 h-5 text-primary" />
+                    <h3 className="font-medium text-foreground">Charging Case</h3>
+                  </div>
+                  <Badge
+                    variant="outline"
+                    className={`text-xs glass-badge ${
+                      (earbudState.selectedDevice?.caseBattery || 0) > 50
+                        ? 'border-green-500/50 text-green-400'
+                        : (earbudState.selectedDevice?.caseBattery || 0) > 20
+                          ? 'border-yellow-500/50 text-yellow-400'
+                          : 'border-red-500/50 text-red-400'
+                    }`}
+                  >
+                    {(earbudState.selectedDevice?.caseBattery || 0) > 50
+                      ? 'Excellent'
+                      : (earbudState.selectedDevice?.caseBattery || 0) > 20
+                        ? 'Good'
+                        : 'Low'}
+                  </Badge>
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="flex-1 glass-progress h-3">
+                  <div className="flex-1 glass-progress h-3 rounded-full overflow-hidden">
                     <div
-                      className="h-full glass-progress-indicator"
+                      className="h-full glass-progress-indicator transition-all duration-300"
                       style={{
                         width: `${Math.round(earbudState.selectedDevice?.caseBattery || 0)}%`,
                         background: `linear-gradient(90deg, hsl(var(--${getBatteryColor(earbudState.selectedDevice?.caseBattery || 0)})), hsl(var(--${getBatteryColor(earbudState.selectedDevice?.caseBattery || 0)})) 50%, hsl(var(--${getBatteryColor(earbudState.selectedDevice?.caseBattery || 0)}) / 0.8))`
                       }}
                     />
                   </div>
-                  <Badge variant="outline" className="text-xs glass-badge">
+                  <Badge variant="outline" className="text-sm glass-badge font-mono">
                     {Math.round(earbudState.selectedDevice?.caseBattery || 0)}%
                   </Badge>
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  Estimated charging time: {
+                    (earbudState.selectedDevice?.caseBattery || 0) > 80
+                      ? 'Fully charged'
+                      : `${Math.round((100 - (earbudState.selectedDevice?.caseBattery || 0)) / 10)} hours remaining`
+                  }
                 </div>
               </div>
             </Card>
