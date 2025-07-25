@@ -150,20 +150,30 @@ export class AudioEngine {
   }
 
   updateControls(state: AudioControlState): void {
-    if (!this.isInitialized) return;
+    if (!this.isInitialized || !this.audioContext) {
+      console.warn('Audio engine not initialized');
+      return;
+    }
+
+    console.log('Applying audio controls:', state);
 
     // Update left/right enable state
     if (this.leftGainNode) {
-      this.leftGainNode.gain.value = state.leftEnabled ? 1 : 0;
+      const leftGain = state.leftEnabled ? 1 : 0;
+      this.leftGainNode.gain.setValueAtTime(leftGain, this.audioContext.currentTime);
+      console.log('Left channel gain:', leftGain);
     }
     if (this.rightGainNode) {
-      this.rightGainNode.gain.value = state.rightEnabled ? 1 : 0;
+      const rightGain = state.rightEnabled ? 1 : 0;
+      this.rightGainNode.gain.setValueAtTime(rightGain, this.audioContext.currentTime);
+      console.log('Right channel gain:', rightGain);
     }
 
     // Update audio balance (-1 = full left, 0 = center, 1 = full right)
     if (this.stereoPannerNode) {
-      const panValue = state.audioBalance / 100; // Convert from -100/100 to -1/1
-      this.stereoPannerNode.pan.value = Math.max(-1, Math.min(1, panValue));
+      const panValue = Math.max(-1, Math.min(1, state.audioBalance / 100));
+      this.stereoPannerNode.pan.setValueAtTime(panValue, this.audioContext.currentTime);
+      console.log('Stereo pan value:', panValue);
     }
 
     // Update equalizer
@@ -171,19 +181,21 @@ export class AudioEngine {
       if (index < state.equalizerBands.length) {
         // Convert from 0-100 to -12/+12 dB
         const gainValue = (state.equalizerBands[index] - 50) * 0.24;
-        filter.gain.value = gainValue;
+        filter.gain.setValueAtTime(gainValue, this.audioContext.currentTime);
+        console.log(`EQ Band ${index} (${filter.frequency.value}Hz):`, gainValue, 'dB');
       }
     });
 
     // Update compressor bypass for volume leveller
-    if (this.compressorNode && this.masterGainNode) {
+    if (this.compressorNode) {
       if (state.volumeLeveller) {
-        // Compressor is already in the chain
-        this.compressorNode.threshold.value = -24;
+        // Enable compressor
+        this.compressorNode.threshold.setValueAtTime(-24, this.audioContext.currentTime);
       } else {
         // Disable compressor by setting threshold very high
-        this.compressorNode.threshold.value = 0;
+        this.compressorNode.threshold.setValueAtTime(0, this.audioContext.currentTime);
       }
+      console.log('Volume leveller:', state.volumeLeveller ? 'enabled' : 'disabled');
     }
   }
 

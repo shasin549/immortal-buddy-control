@@ -92,26 +92,25 @@ const EarbudControl = () => {
           console.log('Bluetooth access denied or cancelled:', bluetoothError);
           toast({
             title: "Bluetooth Access Denied",
-            description: "Showing demo devices instead. Grant permission to scan real devices.",
+            description: "Grant permission to scan for devices.",
+            variant: "destructive",
           });
-          addDemoDevices();
         }
       } else {
         toast({
           title: "Bluetooth Not Supported",
-          description: "Your browser doesn't support Bluetooth. Showing demo devices.",
+          description: "Your browser doesn't support Bluetooth Web API.",
+          variant: "destructive",
         });
-        addDemoDevices();
       }
 
     } catch (error) {
       console.error('Scan error:', error);
       toast({
         title: "Scan Failed",
-        description: "Unable to scan for devices. Showing demo devices.",
+        description: "Unable to scan for devices.",
         variant: "destructive",
       });
-      addDemoDevices();
     } finally {
       // Add delay to show scanning animation
       setTimeout(() => {
@@ -120,53 +119,7 @@ const EarbudControl = () => {
     }
   };
 
-  // Add demo devices for testing
-  const addDemoDevices = () => {
-    const demoDevices: BluetoothDevice[] = [
-      {
-        id: 'demo_airpods',
-        name: 'AirPods Pro',
-        type: 'earbuds',
-        isConnected: false,
-        isPaired: true,
-        rssi: -45
-      },
-      {
-        id: 'demo_boat',
-        name: 'boAt Immortal 161',
-        type: 'earbuds',
-        isConnected: false,
-        isPaired: true,
-        rssi: -38
-      },
-      {
-        id: 'demo_sony',
-        name: 'Sony WH-1000XM4',
-        type: 'headphones',
-        isConnected: false,
-        isPaired: true,
-        rssi: -52
-      }
-    ];
 
-    const newDevices = demoDevices.filter(
-      demo => !availableDevices.find(existing => existing.id === demo.id) &&
-              !connectedDevices.find(existing => existing.id === demo.id)
-    );
-
-    if (newDevices.length > 0) {
-      setAvailableDevices(prev => [...prev, ...newDevices]);
-      toast({
-        title: "Demo Devices Added",
-        description: `Added ${newDevices.length} demo devices for testing.`,
-      });
-    } else {
-      toast({
-        title: "Demo Devices",
-        description: "Demo devices are already available.",
-      });
-    }
-  };
 
   const detectDeviceType = (name: string): BluetoothDevice['type'] => {
     const lowerName = name.toLowerCase();
@@ -196,9 +149,6 @@ const EarbudControl = () => {
       const connectedDevice: BluetoothDevice = {
         ...device,
         isConnected: true,
-        leftBattery: Math.floor(Math.random() * 40) + 60, // Real-time battery would come from device
-        rightBattery: Math.floor(Math.random() * 40) + 60,
-        caseBattery: Math.floor(Math.random() * 40) + 50,
       };
 
       setConnectedDevices(prev => [...prev.filter(d => d.id !== device.id), connectedDevice]);
@@ -229,10 +179,16 @@ const EarbudControl = () => {
   };
 
   const disconnectDevice = (device: BluetoothDevice) => {
-    // Disconnect audio engine
+    // Stop any playing audio and disconnect audio engine
+    const audio = audioEngine.getCurrentAudioElement();
+    if (audio) {
+      audio.pause();
+      audio.currentTime = 0;
+    }
     audioEngine.disconnect();
     setIsAudioInitialized(false);
     setIsPlayingDemo(false);
+
     const disconnectedDevice: BluetoothDevice = {
       ...device,
       isConnected: false,
@@ -250,28 +206,13 @@ const EarbudControl = () => {
 
     toast({
       title: "Device Disconnected",
-      description: `Disconnected from ${device.name}`,
+      description: `Disconnected from ${device.name}. Audio controls disabled.`,
     });
   };
 
   const startBatteryMonitoring = (deviceId: string) => {
-    // Simulate real-time battery updates
-    const interval = setInterval(() => {
-      setConnectedDevices(prev => prev.map(device => {
-        if (device.id === deviceId) {
-          return {
-            ...device,
-            leftBattery: Math.max(0, (device.leftBattery || 80) - Math.random() * 2),
-            rightBattery: Math.max(0, (device.rightBattery || 80) - Math.random() * 2),
-            caseBattery: Math.max(0, (device.caseBattery || 70) - Math.random() * 1),
-          };
-        }
-        return device;
-      }));
-    }, 30000); // Update every 30 seconds
-
-    // Clean up interval when component unmounts or device disconnects
-    return () => clearInterval(interval);
+    // Battery monitoring would be implemented with real device API
+    console.log(`Starting battery monitoring for device: ${deviceId}`);
   };
 
   const getBatteryColor = (level: number) => {
@@ -389,7 +330,10 @@ const EarbudControl = () => {
   };
 
   const updateAudioControls = (earbudStateOverride?: Partial<EarbudState>, equalizerStateOverride?: Partial<EqualizerState>) => {
-    if (!isAudioInitialized) return;
+    if (!isAudioInitialized || !earbudState.selectedDevice) {
+      console.log('Audio controls not available - no device connected or audio not initialized');
+      return;
+    }
 
     const currentEarbudState = earbudStateOverride ? { ...earbudState, ...earbudStateOverride } : earbudState;
     const currentEqualizerState = equalizerStateOverride ? { ...equalizerState, ...equalizerStateOverride } : equalizerState;
@@ -403,10 +347,20 @@ const EarbudControl = () => {
       volumeLeveller: currentEqualizerState.volumeLeveller,
     };
 
+    console.log('Updating audio controls:', audioControlState);
     audioEngine.updateControls(audioControlState);
   };
 
   const startDemoAudio = async () => {
+    if (!earbudState.selectedDevice) {
+      toast({
+        title: "No Device Connected",
+        description: "Please connect a device first to test audio controls.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       if (!isAudioInitialized) {
         await initializeAudioEngine();
@@ -415,7 +369,7 @@ const EarbudControl = () => {
       // Try to find an existing audio element on the page first
       const existingAudio = document.querySelector('audio') as HTMLAudioElement;
 
-      if (existingAudio && existingAudio.src) {
+      if (existingAudio && existingAudio.src && !existingAudio.paused) {
         await audioEngine.connectToAudioElement(existingAudio);
         updateAudioControls();
 
@@ -426,37 +380,8 @@ const EarbudControl = () => {
         return;
       }
 
-      // Create demo audio with online test audio
-      const audio = audioElementRef.current || document.createElement('audio');
-      audio.crossOrigin = 'anonymous';
-      audio.loop = true;
-      audio.volume = 0.3;
-
-      // Use a test audio file
-      audio.src = 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav';
-
-      // Fallback to local oscillator if external audio fails
-      const playDemo = async () => {
-        try {
-          await audio.play();
-          await audioEngine.connectToAudioElement(audio);
-          updateAudioControls();
-          setIsPlayingDemo(true);
-
-          toast({
-            title: "Demo Audio Started",
-            description: "Test audio is playing. Try the controls to hear the difference!",
-          });
-        } catch (playError) {
-          // If external audio fails, create an oscillator demo
-          createOscillatorDemo();
-        }
-      };
-
-      audio.addEventListener('canplaythrough', playDemo, { once: true });
-      audio.addEventListener('error', () => createOscillatorDemo(), { once: true });
-
-      audio.load();
+      // Create oscillator demo since we removed external audio sources
+      createOscillatorDemo();
 
     } catch (error) {
       console.error('Failed to start demo audio:', error);
@@ -505,8 +430,8 @@ const EarbudControl = () => {
       setIsPlayingDemo(true);
 
       toast({
-        title: "Demo Tones Started",
-        description: "Test tones are playing. Try the controls!",
+        title: "Test Audio Started",
+        description: "Try adjusting the controls to hear the effects. Test tones will play for 30 seconds.",
       });
 
       // Stop after 30 seconds
@@ -518,8 +443,8 @@ const EarbudControl = () => {
 
     } catch (error) {
       toast({
-        title: "Demo Audio Failed",
-        description: "Could not create demo audio. Controls will work with any audio playing on the page.",
+        title: "Audio Failed",
+        description: "Could not initialize audio. Controls will work with any audio playing on the page.",
         variant: "destructive",
       });
     }
@@ -536,7 +461,7 @@ const EarbudControl = () => {
     setIsAudioInitialized(false);
 
     toast({
-      title: "Demo Audio Stopped",
+      title: "Audio Stopped",
       description: "Audio controls are now inactive.",
     });
   };
@@ -609,21 +534,34 @@ const EarbudControl = () => {
         </div>
 
         <div className="p-6 space-y-8 relative">
-          {/* Dolby-Style Equalizer */}
+          {/* Enhanced Dolby Equalizer */}
           <div className="space-y-6">
-            {/* Dolby Branding Header */}
-            <div className="text-center space-y-2">
-              <div className="flex items-center justify-center gap-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-xs font-bold">D</span>
+            {/* Enhanced Dolby Branding Header */}
+            <div className="text-center space-y-3">
+              <div className="flex items-center justify-center gap-4">
+                <div className="w-12 h-12 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-2xl shadow-red-500/50">
+                  <span className="text-white text-lg font-bold tracking-wider">D</span>
                 </div>
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-                  DIGITAL PLUS
-                </h2>
+                <div className="text-center">
+                  <h2 className="text-3xl font-black bg-gradient-to-r from-red-500 via-orange-500 to-red-600 bg-clip-text text-transparent tracking-wide">
+                    DOLBY ATMOS
+                  </h2>
+                  <div className="text-xs text-red-400 uppercase tracking-[0.2em] font-semibold">
+                    SPATIAL AUDIO
+                  </div>
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                Professional Audio Enhancement
-              </p>
+              <div className="flex items-center justify-center gap-6 mt-4">
+                <div className="text-center">
+                  <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse mx-auto mb-1"></div>
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-wider">ACTIVE</span>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs text-muted-foreground uppercase tracking-wider font-medium">
+                    Immersive Audio Processing
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* EQ Grid Background */}
@@ -711,74 +649,115 @@ const EarbudControl = () => {
             </div>
           </div>
 
-          {/* Dolby Audio Presets */}
+          {/* Enhanced Dolby Audio Presets */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">∿</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center shadow-lg shadow-red-500/30">
+                <span className="text-white text-sm font-bold">♪</span>
               </div>
-              <h3 className="text-lg font-medium text-foreground">Audio Profiles</h3>
+              <div>
+                <h3 className="text-lg font-bold text-foreground">Dolby Audio Profiles</h3>
+                <p className="text-xs text-red-400 uppercase tracking-wider">Premium Sound Experience</p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {[
-                { id: 'manual', label: 'Manual', description: 'Custom tuning', icon: '⚙️' },
-                { id: 'brilliant-treble', label: 'Crisp', description: 'Enhanced clarity', icon: '💎' },
-                { id: 'bass-boost', label: 'Deep', description: 'Rich bass', icon: '🎵' },
-                { id: 'vocal-boost', label: 'Voice', description: 'Clear dialogue', icon: '🎤' }
+                {
+                  id: 'manual',
+                  label: 'Custom',
+                  description: 'Manual tuning',
+                  icon: '🎛️',
+                  gradient: 'from-slate-600 to-slate-700'
+                },
+                {
+                  id: 'brilliant-treble',
+                  label: 'Crystal',
+                  description: 'Dolby Clarity',
+                  icon: '💎',
+                  gradient: 'from-blue-500 to-cyan-500'
+                },
+                {
+                  id: 'bass-boost',
+                  label: 'Thunder',
+                  description: 'Deep Bass+',
+                  icon: '⚡',
+                  gradient: 'from-purple-500 to-pink-500'
+                },
+                {
+                  id: 'vocal-boost',
+                  label: 'Cinema',
+                  description: 'Voice Clarity',
+                  icon: '🎬',
+                  gradient: 'from-green-500 to-emerald-500'
+                }
               ].map((preset) => (
                 <Button
                   key={preset.id}
                   variant="ghost"
-                  className={`h-20 p-4 transition-all duration-300 relative overflow-hidden ${
+                  className={`h-24 p-4 transition-all duration-500 relative overflow-hidden group ${
                     equalizerState.preset === preset.id
-                      ? 'bg-gradient-to-br from-red-500/20 to-orange-500/20 border-2 border-red-500/50 shadow-lg shadow-red-500/20'
-                      : 'bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 hover:border-red-500/30'
+                      ? `bg-gradient-to-br ${preset.gradient}/20 border-2 border-red-500/60 shadow-xl shadow-red-500/30 scale-105`
+                      : 'bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 hover:border-red-500/40 hover:shadow-lg hover:shadow-red-500/10'
                   }`}
                   onClick={() => applyPreset(preset.id as EqualizerState['preset'])}
                 >
-                  <div className="flex flex-col items-center space-y-2 relative z-10">
-                    <div className="text-2xl">{preset.icon}</div>
+                  <div className="flex flex-col items-center space-y-3 relative z-10">
+                    <div className="text-3xl group-hover:scale-110 transition-transform duration-300">{preset.icon}</div>
                     <div className="text-center">
-                      <div className="font-semibold text-sm">{preset.label}</div>
-                      <div className="text-xs text-slate-400">{preset.description}</div>
+                      <div className="font-bold text-sm uppercase tracking-wide">{preset.label}</div>
+                      <div className="text-xs text-slate-400 font-medium">{preset.description}</div>
                     </div>
                   </div>
 
-                  {/* Active indicator */}
+                  {/* Enhanced Active indicator */}
                   {equalizerState.preset === preset.id && (
-                    <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                    <>
+                      <div className="absolute top-3 right-3 w-4 h-4 bg-red-500 rounded-full animate-pulse shadow-lg shadow-red-500/50" />
+                      <div className="absolute top-3 right-3 w-4 h-4 bg-red-400 rounded-full animate-ping" />
+                    </>
                   )}
 
-                  {/* Dolby shimmer effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                  {/* Enhanced Dolby shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/15 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1200" />
+
+                  {/* Premium glow effect for active preset */}
+                  {equalizerState.preset === preset.id && (
+                    <div className={`absolute inset-0 bg-gradient-to-br ${preset.gradient}/10 rounded-lg animate-pulse`} />
+                  )}
                 </Button>
               ))}
             </div>
           </div>
 
-          {/* Dolby Enhancement Features */}
+          {/* Enhanced Dolby Enhancement Features */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">+</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center shadow-lg shadow-red-500/30">
+                <span className="text-white text-sm font-bold">✨</span>
               </div>
-              <h3 className="text-lg font-medium text-foreground">Enhancement Suite</h3>
+              <div>
+                <h3 className="text-lg font-bold text-foreground">Dolby Enhancement Suite</h3>
+                <p className="text-xs text-red-400 uppercase tracking-wider">Advanced Audio Technologies</p>
+              </div>
             </div>
 
             <div className="space-y-4">
-              {/* Surround Virtualizer */}
-              <Card className="p-6 bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl">
+              {/* Enhanced Spatial Virtualizer */}
+              <Card className="p-6 bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/60 backdrop-blur-xl shadow-xl">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-                        <span className="text-white text-xs">🎭</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                        <span className="text-white text-lg">🌐</span>
                       </div>
-                      <h4 className="font-semibold text-foreground">Spatial Virtualizer</h4>
+                      <div>
+                        <h4 className="font-bold text-foreground text-base">Dolby Atmos Virtualizer</h4>
+                        <div className="text-xs text-purple-400 uppercase tracking-wider font-semibold">360° SPATIAL AUDIO</div>
+                      </div>
                     </div>
-                    <p className="text-sm text-slate-400 ml-10">
-                      Advanced 3D audio processing for immersive surround sound experience
+                    <p className="text-sm text-slate-300 ml-13 leading-relaxed">
+                      Revolutionary 3D audio processing delivering cinematic surround sound through any headphones
                     </p>
                   </div>
                   <div className="flex flex-col items-center gap-2">
@@ -801,18 +780,21 @@ const EarbudControl = () => {
                 }`} />
               </Card>
 
-              {/* Volume Leveller */}
-              <Card className="p-6 bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl">
+              {/* Enhanced Volume Leveller */}
+              <Card className="p-6 bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/60 backdrop-blur-xl shadow-xl">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-                        <span className="text-white text-xs">📊</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-green-500/30">
+                        <span className="text-white text-lg">🎚️</span>
                       </div>
-                      <h4 className="font-semibold text-foreground">Dynamic Range Control</h4>
+                      <div>
+                        <h4 className="font-bold text-foreground text-base">Dolby Volume Leveller</h4>
+                        <div className="text-xs text-green-400 uppercase tracking-wider font-semibold">INTELLIGENT DYNAMICS</div>
+                      </div>
                     </div>
-                    <p className="text-sm text-slate-400 ml-10">
-                      Intelligent compression for consistent volume across all content
+                    <p className="text-sm text-slate-300 ml-13 leading-relaxed">
+                      Advanced dynamic range control ensuring consistent, optimized audio levels across all content types
                     </p>
                   </div>
                   <div className="flex flex-col items-center gap-2">
@@ -886,10 +868,7 @@ const EarbudControl = () => {
                   <Scan className="w-4 h-4 mr-2" />
                   {earbudState.isScanning ? 'Scanning...' : 'Scan for Devices'}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={addDemoDevices}>
-                  <Power className="w-4 h-4 mr-2" />
-                  Add Demo Devices
-                </DropdownMenuItem>
+
                 <DropdownMenuSeparator className="bg-glass-border" />
                 <DropdownMenuItem onClick={clearAllDevices}>
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -990,7 +969,7 @@ const EarbudControl = () => {
           <Card className="p-8 glass-card glass-surface text-center">
             <Bluetooth className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">No Devices Found</h3>
-            <p className="text-muted-foreground mb-6">Scan for nearby Bluetooth devices or try demo devices</p>
+            <p className="text-muted-foreground mb-6">Scan for nearby Bluetooth devices</p>
             <div className="flex flex-col gap-3 w-full max-w-sm mx-auto">
               <Button
                 onClick={scanForDevices}
@@ -1000,14 +979,7 @@ const EarbudControl = () => {
                 <Scan className="w-4 h-4 mr-2" />
                 Scan for Real Devices
               </Button>
-              <Button
-                onClick={addDemoDevices}
-                className="glass-button border-0 w-full"
-                variant="ghost"
-              >
-                <Power className="w-4 h-4 mr-2" />
-                Try Demo Devices
-              </Button>
+
             </div>
           </Card>
         )}
@@ -1022,6 +994,19 @@ const EarbudControl = () => {
 
         {earbudState.selectedDevice && (
           <>
+            {/* Device Status */}
+            <Card className="p-4 glass-card glass-surface mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BluetoothConnected className="w-4 h-4 text-primary" />
+                  <span className="text-sm text-foreground">Audio Engine Status:</span>
+                </div>
+                <Badge variant={isAudioInitialized ? "default" : "secondary"} className="text-xs">
+                  {isAudioInitialized ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+            </Card>
+
             {/* Control Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Left Earbud Control */}
@@ -1152,7 +1137,7 @@ const EarbudControl = () => {
                     variant="ghost"
                   >
                     <Volume2 className="w-4 h-4 mr-2" />
-                    Test Audio Controls
+                    Test Audio
                   </Button>
                 ) : (
                   <Button
@@ -1161,7 +1146,7 @@ const EarbudControl = () => {
                     variant="ghost"
                   >
                     <Power className="w-4 h-4 mr-2" />
-                    Stop Demo Audio
+                    Stop Audio
                   </Button>
                 )}
                 <Button
