@@ -780,18 +780,21 @@ const EarbudControl = () => {
                 }`} />
               </Card>
 
-              {/* Volume Leveller */}
-              <Card className="p-6 bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl">
+              {/* Enhanced Volume Leveller */}
+              <Card className="p-6 bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/60 backdrop-blur-xl shadow-xl">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-green-500 to-emerald-500 flex items-center justify-center">
-                        <span className="text-white text-xs">📊</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-green-500 via-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-green-500/30">
+                        <span className="text-white text-lg">🎚️</span>
                       </div>
-                      <h4 className="font-semibold text-foreground">Dynamic Range Control</h4>
+                      <div>
+                        <h4 className="font-bold text-foreground text-base">Dolby Volume Leveller</h4>
+                        <div className="text-xs text-green-400 uppercase tracking-wider font-semibold">INTELLIGENT DYNAMICS</div>
+                      </div>
                     </div>
-                    <p className="text-sm text-slate-400 ml-10">
-                      Intelligent compression for consistent volume across all content
+                    <p className="text-sm text-slate-300 ml-13 leading-relaxed">
+                      Advanced dynamic range control ensuring consistent, optimized audio levels across all content types
                     </p>
                   </div>
                   <div className="flex flex-col items-center gap-2">
