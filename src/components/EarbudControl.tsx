@@ -269,7 +269,11 @@ const EarbudControl = () => {
         </div>
 
         {/* Main Device Card - boAt Immortal 161 */}
-        <Card className="p-6 glass-card glass-primary relative glass-shimmer">
+        <Card className={`p-6 glass-card relative glass-shimmer transition-all duration-500 ${
+          earbudState.isConnected
+            ? 'glass-primary border-primary/40 shadow-glow'
+            : 'glass-surface border-border/30'
+        }`}>
           <div className="relative flex items-center justify-between">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
