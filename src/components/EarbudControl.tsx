@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Bluetooth, BluetoothConnected, Battery, Volume2, Power, MoreVertical, ArrowLeft, Settings } from "lucide-react";
-import earbudsIcon from "@/assets/earbuds-icon.png";
+import { Bluetooth, BluetoothConnected, Battery, Volume2, Power, MoreVertical, ArrowLeft, Settings, Scan } from "lucide-react";
 
 interface EarbudState {
   isConnected: boolean;
