@@ -933,6 +933,19 @@ const EarbudControl = () => {
 
         {earbudState.selectedDevice && (
           <>
+            {/* Device Status */}
+            <Card className="p-4 glass-card glass-surface mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <BluetoothConnected className="w-4 h-4 text-primary" />
+                  <span className="text-sm text-foreground">Audio Engine Status:</span>
+                </div>
+                <Badge variant={isAudioInitialized ? "default" : "secondary"} className="text-xs">
+                  {isAudioInitialized ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+            </Card>
+
             {/* Control Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Left Earbud Control */}
