@@ -842,186 +842,183 @@ const EarbudControl = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Hero Header */}
-      <div className="relative px-6 py-12 text-center">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-light text-white mb-3">
-            Manage Devices{' '}
-            <span className="font-normal">
-              Effortlessly<span className="text-red-500">.</span>
-            </span>
+    <div className="min-h-screen bg-background glass-bg-animated">
+      {/* Header */}
+      <div className="text-center p-6 glass-surface backdrop-blur-sm border-b border-glass-border glass-shimmer">
+        <div className="flex items-center justify-center gap-3">
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2Fe34d4a59f2d343dea48709605eb95b58%2Fe6b0d9f81cc24f479688d79e49ca875a?format=webp&width=800"
+            alt="boAt Logo"
+            className="w-8 h-8 object-contain"
+          />
+          <h1 className="text-2xl font-bold text-foreground drop-shadow-lg">
+            My boAt
           </h1>
-          <p className="text-slate-400 text-lg mb-8">
-            Connect, control, and customize your audio experience
-          </p>
         </div>
       </div>
 
-      {/* Device Management Interface */}
-      <div className="max-w-md mx-auto px-4">
-        {/* Phone Mockup Container */}
-        <div className="relative">
-          {/* Phone Frame */}
-          <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-[3rem] p-2 shadow-2xl border border-slate-700/50">
-            <div className="bg-black rounded-[2.5rem] overflow-hidden">
-              {/* Status Bar */}
-              <div className="flex justify-between items-center px-6 py-3 text-white text-sm">
-                <span className="font-medium">12:30</span>
-                <div className="flex items-center gap-1">
-                  <div className="flex gap-1">
-                    <div className="w-1 h-4 bg-white rounded-full"></div>
-                    <div className="w-1 h-4 bg-white rounded-full"></div>
-                    <div className="w-1 h-4 bg-white/50 rounded-full"></div>
+      <div className="px-4 space-y-4">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <h2 className="text-xl font-semibold text-foreground">My Devices</h2>
+            <Badge variant="outline" className="glass-badge text-xs">
+              {connectedDevices.length} Connected
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={scanForDevices}
+              disabled={earbudState.isScanning}
+              className="glass-button border-0"
+            >
+              <Scan className={`w-5 h-5 ${earbudState.isScanning ? 'animate-spin' : ''}`} />
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="glass-button border-0">
+                  <MoreVertical className="w-5 h-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="glass-card glass-surface border-glass-border">
+                <DropdownMenuItem onClick={scanForDevices} disabled={earbudState.isScanning}>
+                  <Scan className="w-4 h-4 mr-2" />
+                  {earbudState.isScanning ? 'Scanning...' : 'Scan for Devices'}
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={addDemoDevices}>
+                  <Power className="w-4 h-4 mr-2" />
+                  Add Demo Devices
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-glass-border" />
+                <DropdownMenuItem onClick={clearAllDevices}>
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Clear All Devices
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <RefreshCw className="w-4 h-4 mr-2" />
+                  Refresh
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-glass-border" />
+                <DropdownMenuItem>
+                  <Info className="w-4 h-4 mr-2" />
+                  About
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </div>
+
+        {/* Available Devices */}
+        {availableDevices.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-medium text-foreground">Available Devices</h3>
+            {availableDevices.map((device) => (
+              <Card key={device.id} className="p-4 glass-card glass-surface">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Bluetooth className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <h4 className="font-medium text-foreground">{device.name}</h4>
+                      <p className="text-xs text-muted-foreground capitalize">{device.type}</p>
+                    </div>
                   </div>
-                  <div className="w-6 h-3 border border-white rounded-sm">
-                    <div className="w-4 h-2 bg-white rounded-sm m-0.5"></div>
-                  </div>
-                </div>
-              </div>
-
-              {/* App Content */}
-              <div className="px-6 py-4 min-h-[600px]">
-                {/* Header */}
-                <div className="flex items-center justify-between mb-8">
-                  <h2 className="text-white text-2xl font-light">My Devices</h2>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="text-slate-400 hover:text-white"
-                      >
-                        <MoreVertical className="w-5 h-5" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
-                      <DropdownMenuItem onClick={scanForDevices} disabled={earbudState.isScanning}>
-                        <Scan className="w-4 h-4 mr-2" />
-                        {earbudState.isScanning ? 'Scanning...' : 'Scan for Devices'}
-                      </DropdownMenuItem>
-                      <DropdownMenuItem onClick={addDemoDevices}>
-                        <Power className="w-4 h-4 mr-2" />
-                        Add Demo Devices
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-slate-700" />
-                      <DropdownMenuItem onClick={clearAllDevices}>
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Clear All Devices
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-
-                {/* Device Cards */}
-                <div className="space-y-4">
-
-
-                  {/* Connected Devices */}
-                  {connectedDevices.map((device) => (
-                    <div key={device.id} className="bg-gradient-to-r from-slate-800/50 to-slate-700/50 rounded-2xl p-6 border border-slate-600/30 relative overflow-hidden">
-                      {/* Status Badge */}
-                      <div className="flex items-center gap-2 mb-4">
-                        <Bluetooth className="w-4 h-4 text-blue-400" />
-                        <span className="text-blue-400 text-xs font-medium uppercase tracking-wider">CONNECTED</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-white text-lg font-medium mb-2">{device.name}</h3>
-                          {device.leftBattery && device.rightBattery && (
-                            <div className="flex items-center gap-4 text-slate-400 text-sm">
-                              <span>L: {Math.round(device.leftBattery)}%</span>
-                              <span>R: {Math.round(device.rightBattery)}%</span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="w-16 h-16 relative">
-                          <img
-                            src="https://cdn.builder.io/api/v1/image/assets%2Fe34d4a59f2d343dea48709605eb95b58%2Fc52eb2c188f5425b95b46cd22563605b?format=webp&width=800"
-                            alt="Device"
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={() => disconnectDevice(device)}
-                        className="w-full mt-4 bg-red-600/20 hover:bg-red-600/30 text-red-400 border border-red-600/30"
-                        variant="outline"
-                      >
-                        Disconnect
-                      </Button>
-                    </div>
-                  ))}
-
-                  {/* Available Devices */}
-                  {availableDevices.map((device) => (
-                    <div key={device.id} className="bg-slate-800/30 rounded-2xl p-6 border border-slate-600/20">
-                      {/* Status Badge */}
-                      <div className="flex items-center gap-2 mb-4">
-                        <Bluetooth className="w-4 h-4 text-slate-400" />
-                        <span className="text-slate-400 text-xs font-medium uppercase tracking-wider">AVAILABLE</span>
-                      </div>
-
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-white text-lg font-medium mb-1">{device.name}</h3>
-                          <p className="text-slate-400 text-sm capitalize">{device.type}</p>
-                        </div>
-                        <div className="w-16 h-16 relative opacity-70">
-                          <img
-                            src="https://cdn.builder.io/api/v1/image/assets%2Fe34d4a59f2d343dea48709605eb95b58%2Fc52eb2c188f5425b95b46cd22563605b?format=webp&width=800"
-                            alt="Device"
-                            className="w-full h-full object-contain"
-                          />
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={() => connectToDevice(device)}
-                        className="w-full mt-4 bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-600/30"
-                        variant="outline"
-                      >
-                        Connect
-                      </Button>
-                    </div>
-                  ))}
-
-
-
-                  {/* No devices message */}
-                  {availableDevices.length === 0 && connectedDevices.length === 0 && !earbudState.isScanning && (
-                    <div className="text-center py-12">
-                      <Bluetooth className="w-16 h-16 text-slate-600 mx-auto mb-4" />
-                      <h3 className="text-white text-lg font-medium mb-2">No Devices Found</h3>
-                      <p className="text-slate-400 mb-6">Discover and connect your audio devices</p>
-                    </div>
-                  )}
-
-                  {/* Scanning indicator */}
-                  {earbudState.isScanning && (
-                    <div className="text-center py-8">
-                      <Scan className="w-8 h-8 text-blue-400 mx-auto mb-3 animate-spin" />
-                      <p className="text-white">Scanning for devices...</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Add Device Button */}
-                <div className="px-6 pb-6">
                   <Button
-                    onClick={scanForDevices}
-                    disabled={earbudState.isScanning}
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-4 rounded-2xl"
+                    onClick={() => connectToDevice(device)}
+                    className="glass-button border-0"
+                    variant="ghost"
+                    size="sm"
                   >
-                    Add a Device +
+                    <Power className="w-4 h-4 mr-2" />
+                    Connect
                   </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {/* Connected Devices */}
+        {connectedDevices.map((device) => (
+          <Card key={device.id} className="p-6 glass-card glass-primary relative glass-shimmer border-primary/40 shadow-glow">
+            <div className="relative flex items-center justify-between">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <BluetoothConnected className="w-4 h-4 text-primary animate-pulse" />
+                  <Badge
+                    variant="default"
+                    className="text-xs uppercase tracking-wide glass-badge border-0 bg-primary/20 text-primary"
+                  >
+                    Connected
+                  </Badge>
+                </div>
+                <h3 className="text-xl font-semibold text-foreground">{device.name}</h3>
+
+                {device.leftBattery && device.rightBattery && (
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <Battery className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">L: {Math.round(device.leftBattery)}%</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Battery className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-sm text-muted-foreground">R: {Math.round(device.rightBattery)}%</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center">
+                  <Bluetooth className="w-10 h-10 text-primary" />
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+
+            <Button
+              onClick={() => disconnectDevice(device)}
+              variant="destructive"
+              className="w-full mt-4 glass-button border-0 bg-gradient-to-r from-destructive/80 to-destructive/60"
+            >
+              <Power className="w-4 h-4 mr-2" />
+              Disconnect
+            </Button>
+          </Card>
+        ))}
+
+        {/* No devices message */}
+        {availableDevices.length === 0 && connectedDevices.length === 0 && !earbudState.isScanning && (
+          <Card className="p-8 glass-card glass-surface text-center">
+            <Bluetooth className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-foreground mb-2">No Devices Found</h3>
+            <p className="text-muted-foreground mb-6">Scan for nearby Bluetooth devices or try demo devices</p>
+            <div className="flex flex-col gap-3 w-full max-w-sm mx-auto">
+              <Button
+                onClick={scanForDevices}
+                className="glass-button border-0 w-full"
+                variant="ghost"
+              >
+                <Scan className="w-4 h-4 mr-2" />
+                Scan for Real Devices
+              </Button>
+              <Button
+                onClick={addDemoDevices}
+                className="glass-button border-0 w-full"
+                variant="ghost"
+              >
+                <Power className="w-4 h-4 mr-2" />
+                Try Demo Devices
+              </Button>
+            </div>
+          </Card>
+        )}
+
+        {/* Scanning indicator */}
+        {earbudState.isScanning && (
+          <Card className="p-6 glass-card glass-accent text-center">
+            <Scan className="w-8 h-8 text-primary mx-auto mb-3 animate-spin" />
+            <p className="text-foreground">Scanning for devices...</p>
+          </Card>
+        )}
 
         {earbudState.selectedDevice && (
           <>
