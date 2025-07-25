@@ -37,6 +37,7 @@ interface EqualizerState {
 }
 
 const EarbudControl = () => {
+  const { toast } = useToast();
   const [currentView, setCurrentView] = useState<'devices' | 'settings'>('devices');
   const [availableDevices, setAvailableDevices] = useState<BluetoothDevice[]>([]);
   const [connectedDevices, setConnectedDevices] = useState<BluetoothDevice[]>([]);
