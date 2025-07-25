@@ -330,7 +330,10 @@ const EarbudControl = () => {
   };
 
   const updateAudioControls = (earbudStateOverride?: Partial<EarbudState>, equalizerStateOverride?: Partial<EqualizerState>) => {
-    if (!isAudioInitialized) return;
+    if (!isAudioInitialized || !earbudState.selectedDevice) {
+      console.log('Audio controls not available - no device connected or audio not initialized');
+      return;
+    }
 
     const currentEarbudState = earbudStateOverride ? { ...earbudState, ...earbudStateOverride } : earbudState;
     const currentEqualizerState = equalizerStateOverride ? { ...equalizerState, ...equalizerStateOverride } : equalizerState;
@@ -344,6 +347,7 @@ const EarbudControl = () => {
       volumeLeveller: currentEqualizerState.volumeLeveller,
     };
 
+    console.log('Updating audio controls:', audioControlState);
     audioEngine.updateControls(audioControlState);
   };
 
