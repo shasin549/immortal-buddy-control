@@ -92,26 +92,25 @@ const EarbudControl = () => {
           console.log('Bluetooth access denied or cancelled:', bluetoothError);
           toast({
             title: "Bluetooth Access Denied",
-            description: "Showing demo devices instead. Grant permission to scan real devices.",
+            description: "Grant permission to scan for devices.",
+            variant: "destructive",
           });
-          addDemoDevices();
         }
       } else {
         toast({
           title: "Bluetooth Not Supported",
-          description: "Your browser doesn't support Bluetooth. Showing demo devices.",
+          description: "Your browser doesn't support Bluetooth Web API.",
+          variant: "destructive",
         });
-        addDemoDevices();
       }
 
     } catch (error) {
       console.error('Scan error:', error);
       toast({
         title: "Scan Failed",
-        description: "Unable to scan for devices. Showing demo devices.",
+        description: "Unable to scan for devices.",
         variant: "destructive",
       });
-      addDemoDevices();
     } finally {
       // Add delay to show scanning animation
       setTimeout(() => {
@@ -120,53 +119,7 @@ const EarbudControl = () => {
     }
   };
 
-  // Add demo devices for testing
-  const addDemoDevices = () => {
-    const demoDevices: BluetoothDevice[] = [
-      {
-        id: 'demo_airpods',
-        name: 'AirPods Pro',
-        type: 'earbuds',
-        isConnected: false,
-        isPaired: true,
-        rssi: -45
-      },
-      {
-        id: 'demo_boat',
-        name: 'boAt Immortal 161',
-        type: 'earbuds',
-        isConnected: false,
-        isPaired: true,
-        rssi: -38
-      },
-      {
-        id: 'demo_sony',
-        name: 'Sony WH-1000XM4',
-        type: 'headphones',
-        isConnected: false,
-        isPaired: true,
-        rssi: -52
-      }
-    ];
 
-    const newDevices = demoDevices.filter(
-      demo => !availableDevices.find(existing => existing.id === demo.id) &&
-              !connectedDevices.find(existing => existing.id === demo.id)
-    );
-
-    if (newDevices.length > 0) {
-      setAvailableDevices(prev => [...prev, ...newDevices]);
-      toast({
-        title: "Demo Devices Added",
-        description: `Added ${newDevices.length} demo devices for testing.`,
-      });
-    } else {
-      toast({
-        title: "Demo Devices",
-        description: "Demo devices are already available.",
-      });
-    }
-  };
 
   const detectDeviceType = (name: string): BluetoothDevice['type'] => {
     const lowerName = name.toLowerCase();
@@ -196,9 +149,6 @@ const EarbudControl = () => {
       const connectedDevice: BluetoothDevice = {
         ...device,
         isConnected: true,
-        leftBattery: Math.floor(Math.random() * 40) + 60, // Real-time battery would come from device
-        rightBattery: Math.floor(Math.random() * 40) + 60,
-        caseBattery: Math.floor(Math.random() * 40) + 50,
       };
 
       setConnectedDevices(prev => [...prev.filter(d => d.id !== device.id), connectedDevice]);
@@ -255,23 +205,8 @@ const EarbudControl = () => {
   };
 
   const startBatteryMonitoring = (deviceId: string) => {
-    // Simulate real-time battery updates
-    const interval = setInterval(() => {
-      setConnectedDevices(prev => prev.map(device => {
-        if (device.id === deviceId) {
-          return {
-            ...device,
-            leftBattery: Math.max(0, (device.leftBattery || 80) - Math.random() * 2),
-            rightBattery: Math.max(0, (device.rightBattery || 80) - Math.random() * 2),
-            caseBattery: Math.max(0, (device.caseBattery || 70) - Math.random() * 1),
-          };
-        }
-        return device;
-      }));
-    }, 30000); // Update every 30 seconds
-
-    // Clean up interval when component unmounts or device disconnects
-    return () => clearInterval(interval);
+    // Battery monitoring would be implemented with real device API
+    console.log(`Starting battery monitoring for device: ${deviceId}`);
   };
 
   const getBatteryColor = (level: number) => {
@@ -432,8 +367,8 @@ const EarbudControl = () => {
       audio.loop = true;
       audio.volume = 0.3;
 
-      // Use a test audio file
-      audio.src = 'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav';
+      // Audio source would be provided by user or system
+      audio.src = '';
 
       // Fallback to local oscillator if external audio fails
       const playDemo = async () => {
@@ -444,8 +379,8 @@ const EarbudControl = () => {
           setIsPlayingDemo(true);
 
           toast({
-            title: "Demo Audio Started",
-            description: "Test audio is playing. Try the controls to hear the difference!",
+            title: "Audio Started",
+            description: "Audio controls are now active.",
           });
         } catch (playError) {
           // If external audio fails, create an oscillator demo
@@ -505,8 +440,8 @@ const EarbudControl = () => {
       setIsPlayingDemo(true);
 
       toast({
-        title: "Demo Tones Started",
-        description: "Test tones are playing. Try the controls!",
+        title: "Audio Started",
+        description: "Audio controls are now active.",
       });
 
       // Stop after 30 seconds
@@ -518,8 +453,8 @@ const EarbudControl = () => {
 
     } catch (error) {
       toast({
-        title: "Demo Audio Failed",
-        description: "Could not create demo audio. Controls will work with any audio playing on the page.",
+        title: "Audio Failed",
+        description: "Could not initialize audio. Controls will work with any audio playing on the page.",
         variant: "destructive",
       });
     }
@@ -536,7 +471,7 @@ const EarbudControl = () => {
     setIsAudioInitialized(false);
 
     toast({
-      title: "Demo Audio Stopped",
+      title: "Audio Stopped",
       description: "Audio controls are now inactive.",
     });
   };
@@ -846,13 +781,9 @@ const EarbudControl = () => {
       {/* Header */}
       <div className="text-center p-6 glass-surface backdrop-blur-sm border-b border-glass-border glass-shimmer">
         <div className="flex items-center justify-center gap-3">
-          <img
-            src="https://cdn.builder.io/api/v1/image/assets%2Fe34d4a59f2d343dea48709605eb95b58%2Fe6b0d9f81cc24f479688d79e49ca875a?format=webp&width=800"
-            alt="boAt Logo"
-            className="w-8 h-8 object-contain"
-          />
+          <Bluetooth className="w-8 h-8 text-primary" />
           <h1 className="text-2xl font-bold text-foreground drop-shadow-lg">
-            My boAt
+            Bluetooth Manager
           </h1>
         </div>
       </div>
@@ -886,10 +817,7 @@ const EarbudControl = () => {
                   <Scan className="w-4 h-4 mr-2" />
                   {earbudState.isScanning ? 'Scanning...' : 'Scan for Devices'}
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={addDemoDevices}>
-                  <Power className="w-4 h-4 mr-2" />
-                  Add Demo Devices
-                </DropdownMenuItem>
+
                 <DropdownMenuSeparator className="bg-glass-border" />
                 <DropdownMenuItem onClick={clearAllDevices}>
                   <Trash2 className="w-4 h-4 mr-2" />
@@ -990,7 +918,7 @@ const EarbudControl = () => {
           <Card className="p-8 glass-card glass-surface text-center">
             <Bluetooth className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">No Devices Found</h3>
-            <p className="text-muted-foreground mb-6">Scan for nearby Bluetooth devices or try demo devices</p>
+            <p className="text-muted-foreground mb-6">Scan for nearby Bluetooth devices</p>
             <div className="flex flex-col gap-3 w-full max-w-sm mx-auto">
               <Button
                 onClick={scanForDevices}
@@ -1000,14 +928,7 @@ const EarbudControl = () => {
                 <Scan className="w-4 h-4 mr-2" />
                 Scan for Real Devices
               </Button>
-              <Button
-                onClick={addDemoDevices}
-                className="glass-button border-0 w-full"
-                variant="ghost"
-              >
-                <Power className="w-4 h-4 mr-2" />
-                Try Demo Devices
-              </Button>
+
             </div>
           </Card>
         )}
@@ -1152,7 +1073,7 @@ const EarbudControl = () => {
                     variant="ghost"
                   >
                     <Volume2 className="w-4 h-4 mr-2" />
-                    Test Audio Controls
+                    Test Audio
                   </Button>
                 ) : (
                   <Button
@@ -1161,7 +1082,7 @@ const EarbudControl = () => {
                     variant="ghost"
                   >
                     <Power className="w-4 h-4 mr-2" />
-                    Stop Demo Audio
+                    Stop Audio
                   </Button>
                 )}
                 <Button
