@@ -390,7 +390,7 @@ const EarbudControl = () => {
                     min={-100}
                     max={100}
                     step={1}
-                    className="w-full"
+                    className="w-full slider-glass"
                   />
                   <div className="text-center">
                     <Badge variant="outline" className="text-xs glass-badge">
