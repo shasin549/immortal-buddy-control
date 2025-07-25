@@ -634,12 +634,7 @@ const EarbudControl = () => {
           </>
         )}
 
-        {/* Add Device Button */}
-        {!earbudState.isConnected && (
-          <Button variant="destructive" className="w-full mt-6 h-12 glass-button border-0 bg-gradient-to-r from-destructive/80 to-destructive/60">
-            Add a Device +
-          </Button>
-        )}
+
       </div>
     </div>
   );
