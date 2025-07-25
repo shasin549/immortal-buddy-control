@@ -170,7 +170,11 @@ const EarbudControl = () => {
                 <Button
                   key={preset.id}
                   variant="ghost"
-                  className="w-full justify-start h-12 text-left"
+                  className={`w-full justify-start h-12 text-left transition-all duration-300 hover:glass-card ${
+                    equalizerState.preset === preset.id
+                      ? 'glass-card glass-primary border border-primary/30'
+                      : 'hover:bg-glass-bg hover:backdrop-blur-sm'
+                  }`}
                   onClick={() => applyPreset(preset.id as EqualizerState['preset'])}
                 >
                   <div className="flex items-center space-x-3">
@@ -194,7 +198,7 @@ const EarbudControl = () => {
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-foreground">Profile settings</h3>
             
-            <Card className="p-4 bg-card border-border">
+            <Card className="p-4 glass-card glass-surface">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <h4 className="font-medium text-foreground">Surround Virtualiser</h4>
@@ -211,7 +215,7 @@ const EarbudControl = () => {
               </div>
             </Card>
 
-            <Card className="p-4 bg-card border-border">
+            <Card className="p-4 glass-card glass-surface">
               <div className="flex items-center justify-between">
                 <div className="space-y-1">
                   <h4 className="font-medium text-foreground">Volume leveller</h4>
@@ -254,8 +258,7 @@ const EarbudControl = () => {
         </div>
 
         {/* Main Device Card - boAt Immortal 161 */}
-        <Card className="p-6 bg-card border border-primary/20 relative overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent" />
+        <Card className="p-6 glass-card glass-primary relative">
           <div className="relative flex items-center justify-between">
             <div className="space-y-3">
               <div className="flex items-center gap-2">
@@ -308,7 +311,7 @@ const EarbudControl = () => {
             {/* Control Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Left Earbud Control */}
-              <Card className="p-4 bg-card border-border">
+              <Card className="p-4 glass-card glass-surface">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-foreground">Left Earbud</h3>
@@ -336,7 +339,7 @@ const EarbudControl = () => {
               </Card>
 
               {/* Right Earbud Control */}
-              <Card className="p-4 bg-card border-border">
+              <Card className="p-4 glass-card glass-surface">
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium text-foreground">Right Earbud</h3>
@@ -365,7 +368,7 @@ const EarbudControl = () => {
             </div>
 
             {/* Audio Balance */}
-            <Card className="p-4 bg-card border-border">
+            <Card className="p-4 glass-card glass-accent">
               <div className="space-y-4">
                 <div className="flex items-center gap-2">
                   <Volume2 className="w-5 h-5 text-primary" />
@@ -400,7 +403,7 @@ const EarbudControl = () => {
             </Card>
 
             {/* Charging Case */}
-            <Card className="p-4 bg-card border-border">
+            <Card className="p-4 glass-card glass-surface">
               <div className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Battery className="w-5 h-5 text-primary" />
@@ -424,10 +427,10 @@ const EarbudControl = () => {
             </Card>
 
             {/* Audio Settings Button */}
-            <Button 
+            <Button
               onClick={() => setCurrentView('settings')}
-              className="w-full mt-6 h-12"
-              variant="default"
+              className="w-full mt-6 h-12 glass-button border-0"
+              variant="ghost"
             >
               <Settings className="w-4 h-4 mr-2" />
               Custom Audio Settings
@@ -446,7 +449,7 @@ const EarbudControl = () => {
 
         {/* Add Device Button */}
         {!earbudState.isConnected && (
-          <Button variant="destructive" className="w-full mt-6 h-12">
+          <Button variant="destructive" className="w-full mt-6 h-12 glass-button border-0 bg-gradient-to-r from-destructive/80 to-destructive/60">
             Add a Device +
           </Button>
         )}
