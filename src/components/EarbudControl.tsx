@@ -711,38 +711,47 @@ const EarbudControl = () => {
             </div>
           </div>
 
-          {/* Equalizer Presets */}
+          {/* Dolby Audio Presets */}
           <div className="space-y-4">
-            <h3 className="text-lg font-medium text-foreground">Choose equaliser</h3>
-            <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded flex items-center justify-center">
+                <span className="text-white text-xs font-bold">∿</span>
+              </div>
+              <h3 className="text-lg font-medium text-foreground">Audio Profiles</h3>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
               {[
-                { id: 'manual', label: 'Manual' },
-                { id: 'brilliant-treble', label: 'Brilliant treble' },
-                { id: 'bass-boost', label: 'Bass boost' },
-                { id: 'vocal-boost', label: 'Vocal boost' }
+                { id: 'manual', label: 'Manual', description: 'Custom tuning', icon: '⚙️' },
+                { id: 'brilliant-treble', label: 'Crisp', description: 'Enhanced clarity', icon: '💎' },
+                { id: 'bass-boost', label: 'Deep', description: 'Rich bass', icon: '🎵' },
+                { id: 'vocal-boost', label: 'Voice', description: 'Clear dialogue', icon: '🎤' }
               ].map((preset) => (
                 <Button
                   key={preset.id}
                   variant="ghost"
-                  className={`w-full justify-start h-12 text-left transition-all duration-300 hover:glass-card ${
+                  className={`h-20 p-4 transition-all duration-300 relative overflow-hidden ${
                     equalizerState.preset === preset.id
-                      ? 'glass-card glass-primary border border-primary/30'
-                      : 'hover:bg-glass-bg hover:backdrop-blur-sm'
+                      ? 'bg-gradient-to-br from-red-500/20 to-orange-500/20 border-2 border-red-500/50 shadow-lg shadow-red-500/20'
+                      : 'bg-slate-800/50 border border-slate-700/50 hover:bg-slate-700/50 hover:border-red-500/30'
                   }`}
                   onClick={() => applyPreset(preset.id as EqualizerState['preset'])}
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${
-                      equalizerState.preset === preset.id 
-                        ? 'border-primary bg-primary' 
-                        : 'border-muted-foreground'
-                    }`}>
-                      {equalizerState.preset === preset.id && (
-                        <div className="w-2 h-2 rounded-full bg-primary-foreground" />
-                      )}
+                  <div className="flex flex-col items-center space-y-2 relative z-10">
+                    <div className="text-2xl">{preset.icon}</div>
+                    <div className="text-center">
+                      <div className="font-semibold text-sm">{preset.label}</div>
+                      <div className="text-xs text-slate-400">{preset.description}</div>
                     </div>
-                    <span className="text-foreground">{preset.label}</span>
                   </div>
+
+                  {/* Active indicator */}
+                  {equalizerState.preset === preset.id && (
+                    <div className="absolute top-2 right-2 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                  )}
+
+                  {/* Dolby shimmer effect */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-red-500/10 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                 </Button>
               ))}
             </div>
