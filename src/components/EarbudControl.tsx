@@ -28,6 +28,7 @@ interface EarbudState {
   rightEnabled: boolean;
   audioBalance: number;
   isScanning: boolean;
+  bluetoothSupported: boolean;
 }
 
 interface EqualizerState {
@@ -51,6 +52,7 @@ const EarbudControl = () => {
     rightEnabled: true,
     audioBalance: 0,
     isScanning: false,
+    bluetoothSupported: 'bluetooth' in navigator,
   });
 
   const [equalizerState, setEqualizerState] = useState<EqualizerState>({
@@ -60,55 +62,72 @@ const EarbudControl = () => {
     volumeLeveller: true,
   });
 
-  // Real-time device scanning with fallback demo devices
+  // Demo device for when Bluetooth is not supported
+  const addDemoDevice = () => {
+    const demoDevice: BluetoothDevice = {
+      id: 'demo_device',
+      name: 'Demo Audio Device',
+      type: 'earbuds',
+      isConnected: false,
+      isPaired: true,
+      rssi: -45
+    };
+
+    setAvailableDevices(prev => {
+      const exists = prev.find(d => d.id === demoDevice.id);
+      if (!exists) {
+        return [...prev, demoDevice];
+      }
+      return prev;
+    });
+
+    toast({
+      title: "Demo Device Added",
+      description: "You can now explore the app features with this demo device.",
+    });
+  };
+
+  // Real-time device scanning
   const scanForDevices = async () => {
+    // If Bluetooth is not supported, add demo device instead
+    if (!earbudState.bluetoothSupported) {
+      addDemoDevice();
+      return;
+    }
+
     setEarbudState(prev => ({ ...prev, isScanning: true }));
 
     try {
-      // Check if Bluetooth is supported
-      if (navigator.bluetooth) {
-        try {
-          const device = await navigator.bluetooth.requestDevice({
-            acceptAllDevices: true,
-            optionalServices: ['battery_service', 'device_information']
-          });
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: ['battery_service', 'device_information']
+      });
 
-          const newDevice: BluetoothDevice = {
-            id: device.id || `device_${Date.now()}`,
-            name: device.name || 'Unknown Device',
-            type: detectDeviceType(device.name || ''),
-            isConnected: false,
-            isPaired: true,
-            rssi: -50
-          };
+      const newDevice: BluetoothDevice = {
+        id: device.id || `device_${Date.now()}`,
+        name: device.name || 'Unknown Device',
+        type: detectDeviceType(device.name || ''),
+        isConnected: false,
+        isPaired: true,
+        rssi: -50
+      };
 
-          setAvailableDevices(prev => {
-            const exists = prev.find(d => d.id === newDevice.id);
-            if (exists) return prev;
-            return [...prev, newDevice];
-          });
+      setAvailableDevices(prev => {
+        const exists = prev.find(d => d.id === newDevice.id);
+        if (exists) return prev;
+        return [...prev, newDevice];
+      });
 
-        } catch (bluetoothError) {
-          console.log('Bluetooth access denied or cancelled:', bluetoothError);
-          toast({
-            title: "Bluetooth Access Denied",
-            description: "Grant permission to scan for devices.",
-            variant: "destructive",
-          });
-        }
-      } else {
-        toast({
-          title: "Bluetooth Not Supported",
-          description: "Your browser doesn't support Bluetooth Web API.",
-          variant: "destructive",
-        });
-      }
-
-    } catch (error) {
-      console.error('Scan error:', error);
       toast({
-        title: "Scan Failed",
-        description: "Unable to scan for devices.",
+        title: "Device Found",
+        description: `Found ${newDevice.name}`,
+      });
+
+    } catch (bluetoothError) {
+      console.log('Bluetooth access denied or cancelled:', bluetoothError);
+      toast({
+        title: "Access Denied",
+        description: "Permission was denied or cancelled. Try again.",
         variant: "destructive",
       });
     } finally {
@@ -149,6 +168,10 @@ const EarbudControl = () => {
       const connectedDevice: BluetoothDevice = {
         ...device,
         isConnected: true,
+        // Add demo battery levels for demo device
+        leftBattery: device.id === 'demo_device' ? 85 : device.leftBattery,
+        rightBattery: device.id === 'demo_device' ? 78 : device.rightBattery,
+        caseBattery: device.id === 'demo_device' ? 92 : device.caseBattery,
       };
 
       setConnectedDevices(prev => [...prev.filter(d => d.id !== device.id), connectedDevice]);
@@ -969,7 +992,16 @@ const EarbudControl = () => {
           <Card className="p-8 glass-card glass-surface text-center">
             <Bluetooth className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-medium text-foreground mb-2">No Devices Found</h3>
-            <p className="text-muted-foreground mb-6">Scan for nearby Bluetooth devices</p>
+            {earbudState.bluetoothSupported ? (
+              <p className="text-muted-foreground mb-6">Scan for nearby Bluetooth devices</p>
+            ) : (
+              <div className="space-y-3 mb-6">
+                <p className="text-muted-foreground">Bluetooth is not supported in this browser</p>
+                <p className="text-sm text-amber-500 bg-amber-500/10 px-3 py-2 rounded-lg border border-amber-500/20">
+                  💡 You can still explore the app with a demo device
+                </p>
+              </div>
+            )}
             <div className="flex flex-col gap-3 w-full max-w-sm mx-auto">
               <Button
                 onClick={scanForDevices}
@@ -977,9 +1009,8 @@ const EarbudControl = () => {
                 variant="ghost"
               >
                 <Scan className="w-4 h-4 mr-2" />
-                Scan for Real Devices
+                {earbudState.bluetoothSupported ? 'Scan for Devices' : 'Add Demo Device'}
               </Button>
-
             </div>
           </Card>
         )}
