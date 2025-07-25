@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Slider } from "@/components/ui/slider";
@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
+import { audioEngine, AudioControlState } from "@/lib/audioEngine";
 import { Bluetooth, BluetoothConnected, Battery, Volume2, Power, MoreVertical, ArrowLeft, Settings, Scan, Trash2, RefreshCw, Info } from "lucide-react";
 
 interface BluetoothDevice {
@@ -38,6 +39,9 @@ interface EqualizerState {
 
 const EarbudControl = () => {
   const { toast } = useToast();
+  const audioElementRef = useRef<HTMLAudioElement>(null);
+  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+  const [isPlayingDemo, setIsPlayingDemo] = useState(false);
   const [currentView, setCurrentView] = useState<'devices' | 'settings'>('devices');
   const [availableDevices, setAvailableDevices] = useState<BluetoothDevice[]>([]);
   const [connectedDevices, setConnectedDevices] = useState<BluetoothDevice[]>([]);
@@ -183,6 +187,9 @@ const EarbudControl = () => {
       // Simulate connection process
       setEarbudState(prev => ({ ...prev, isScanning: true }));
 
+      // Initialize audio engine when connecting
+      await initializeAudioEngine();
+
       // In real implementation, this would connect to the actual device
       await new Promise(resolve => setTimeout(resolve, 1500));
 
@@ -222,6 +229,10 @@ const EarbudControl = () => {
   };
 
   const disconnectDevice = (device: BluetoothDevice) => {
+    // Disconnect audio engine
+    audioEngine.disconnect();
+    setIsAudioInitialized(false);
+    setIsPlayingDemo(false);
     const disconnectedDevice: BluetoothDevice = {
       ...device,
       isConnected: false,
@@ -281,39 +292,55 @@ const EarbudControl = () => {
   };
 
   const toggleLeft = () => {
-    setEarbudState(prev => ({
-      ...prev,
-      leftEnabled: !prev.leftEnabled
-    }));
+    setEarbudState(prev => {
+      const newState = {
+        ...prev,
+        leftEnabled: !prev.leftEnabled
+      };
+      updateAudioControls(newState);
+      return newState;
+    });
   };
 
   const toggleRight = () => {
-    setEarbudState(prev => ({
-      ...prev,
-      rightEnabled: !prev.rightEnabled
-    }));
+    setEarbudState(prev => {
+      const newState = {
+        ...prev,
+        rightEnabled: !prev.rightEnabled
+      };
+      updateAudioControls(newState);
+      return newState;
+    });
   };
 
   const handleBalanceChange = (value: number[]) => {
-    setEarbudState(prev => ({
-      ...prev,
-      audioBalance: value[0]
-    }));
+    setEarbudState(prev => {
+      const newState = {
+        ...prev,
+        audioBalance: value[0]
+      };
+      updateAudioControls(newState);
+      return newState;
+    });
   };
 
   const handleEqualizerChange = (index: number, value: number[]) => {
     const newSliders = [...equalizerState.sliders];
     newSliders[index] = value[0];
-    setEqualizerState(prev => ({
-      ...prev,
-      sliders: newSliders,
-      preset: 'manual'
-    }));
+    setEqualizerState(prev => {
+      const newState = {
+        ...prev,
+        sliders: newSliders,
+        preset: 'manual'
+      };
+      updateAudioControls(null, newState);
+      return newState;
+    });
   };
 
   const applyPreset = (preset: EqualizerState['preset']) => {
     let newSliders = [...equalizerState.sliders];
-    
+
     switch (preset) {
       case 'brilliant-treble':
         newSliders = [40, 45, 50, 55, 60, 65, 70, 75, 80, 85];
@@ -327,12 +354,16 @@ const EarbudControl = () => {
       default:
         return;
     }
-    
-    setEqualizerState(prev => ({
-      ...prev,
-      sliders: newSliders,
-      preset
-    }));
+
+    setEqualizerState(prev => {
+      const newState = {
+        ...prev,
+        sliders: newSliders,
+        preset
+      };
+      updateAudioControls(null, newState);
+      return newState;
+    });
   };
 
   if (currentView === 'settings') {
