@@ -6,14 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bluetooth, BluetoothConnected, Battery, Volume2, Power, MoreVertical, ArrowLeft, Settings, Scan } from "lucide-react";
 
-interface EarbudState {
+interface BluetoothDevice {
+  id: string;
+  name: string;
+  type: 'earbuds' | 'headphones' | 'speaker' | 'unknown';
   isConnected: boolean;
+  isPaired: boolean;
+  batteryLevel?: number;
+  leftBattery?: number;
+  rightBattery?: number;
+  caseBattery?: number;
+  rssi?: number;
+}
+
+interface EarbudState {
+  selectedDevice: BluetoothDevice | null;
   leftEnabled: boolean;
   rightEnabled: boolean;
-  leftBattery: number;
-  rightBattery: number;
-  caseBattery: number;
   audioBalance: number;
+  isScanning: boolean;
 }
 
 interface EqualizerState {
