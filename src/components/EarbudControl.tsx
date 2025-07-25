@@ -151,14 +151,9 @@ const EarbudControl = () => {
       // In real implementation, this would connect to the actual device
       await new Promise(resolve => setTimeout(resolve, 1500));
 
-      // Add realistic battery levels for demo devices
       const connectedDevice: BluetoothDevice = {
         ...device,
         isConnected: true,
-        leftBattery: device.type === 'earbuds' ? Math.floor(Math.random() * 40) + 60 : undefined,
-        rightBattery: device.type === 'earbuds' ? Math.floor(Math.random() * 40) + 60 : undefined,
-        caseBattery: device.type === 'earbuds' ? Math.floor(Math.random() * 30) + 70 : undefined,
-        batteryLevel: device.type !== 'earbuds' ? Math.floor(Math.random() * 30) + 70 : undefined,
       };
 
       setConnectedDevices(prev => [...prev.filter(d => d.id !== device.id), connectedDevice]);
