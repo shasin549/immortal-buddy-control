@@ -743,18 +743,21 @@ const EarbudControl = () => {
             </div>
 
             <div className="space-y-4">
-              {/* Surround Virtualizer */}
-              <Card className="p-6 bg-slate-800/50 border border-slate-700/50 backdrop-blur-xl">
+              {/* Enhanced Spatial Virtualizer */}
+              <Card className="p-6 bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-slate-700/60 backdrop-blur-xl shadow-xl">
                 <div className="flex items-center justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-blue-500 flex items-center justify-center">
-                        <span className="text-white text-xs">🎭</span>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 via-indigo-500 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
+                        <span className="text-white text-lg">🌐</span>
                       </div>
-                      <h4 className="font-semibold text-foreground">Spatial Virtualizer</h4>
+                      <div>
+                        <h4 className="font-bold text-foreground text-base">Dolby Atmos Virtualizer</h4>
+                        <div className="text-xs text-purple-400 uppercase tracking-wider font-semibold">360° SPATIAL AUDIO</div>
+                      </div>
                     </div>
-                    <p className="text-sm text-slate-400 ml-10">
-                      Advanced 3D audio processing for immersive surround sound experience
+                    <p className="text-sm text-slate-300 ml-13 leading-relaxed">
+                      Revolutionary 3D audio processing delivering cinematic surround sound through any headphones
                     </p>
                   </div>
                   <div className="flex flex-col items-center gap-2">
