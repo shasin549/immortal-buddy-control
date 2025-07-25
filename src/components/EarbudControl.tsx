@@ -412,12 +412,23 @@ const EarbudControl = () => {
   };
 
   const handleBalanceChange = (value: number[]) => {
+    const newBalance = value[0];
     setEarbudState(prev => {
       const newState = {
         ...prev,
-        audioBalance: value[0]
+        audioBalance: newBalance
       };
       updateAudioControls(newState);
+
+      // Provide real-time feedback
+      if (newBalance === 0) {
+        console.log('Audio balance: Perfectly centered');
+      } else {
+        const direction = newBalance < 0 ? 'left' : 'right';
+        const strength = Math.abs(newBalance);
+        console.log(`Audio balance: ${strength}% ${direction} bias`);
+      }
+
       return newState;
     });
   };
