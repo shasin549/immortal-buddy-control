@@ -771,9 +771,13 @@ const EarbudControl = () => {
       {/* Header */}
       <div className="text-center p-6 glass-surface backdrop-blur-sm border-b border-glass-border glass-shimmer">
         <div className="flex items-center justify-center gap-3">
-          <Bluetooth className="w-8 h-8 text-primary" />
+          <img
+            src="https://cdn.builder.io/api/v1/image/assets%2Fe34d4a59f2d343dea48709605eb95b58%2Fe6b0d9f81cc24f479688d79e49ca875a?format=webp&width=800"
+            alt="boAt Logo"
+            className="w-8 h-8 object-contain"
+          />
           <h1 className="text-2xl font-bold text-foreground drop-shadow-lg">
-            Bluetooth Manager
+            My boAt
           </h1>
         </div>
       </div>
