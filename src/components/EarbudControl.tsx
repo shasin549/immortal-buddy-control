@@ -145,12 +145,23 @@ const EarbudControl = () => {
       }
     ];
 
-    setAvailableDevices(prev => {
-      const newDevices = demoDevices.filter(
-        demo => !prev.find(existing => existing.id === demo.id)
-      );
-      return [...prev, ...newDevices];
-    });
+    const newDevices = demoDevices.filter(
+      demo => !availableDevices.find(existing => existing.id === demo.id) &&
+              !connectedDevices.find(existing => existing.id === demo.id)
+    );
+
+    if (newDevices.length > 0) {
+      setAvailableDevices(prev => [...prev, ...newDevices]);
+      toast({
+        title: "Demo Devices Added",
+        description: `Added ${newDevices.length} demo devices for testing.`,
+      });
+    } else {
+      toast({
+        title: "Demo Devices",
+        description: "Demo devices are already available.",
+      });
+    }
   };
 
   const detectDeviceType = (name: string): BluetoothDevice['type'] => {
