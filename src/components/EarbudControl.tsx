@@ -649,21 +649,48 @@ const EarbudControl = () => {
             </div>
           </div>
 
-          {/* Dolby Audio Presets */}
+          {/* Enhanced Dolby Audio Presets */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-6 h-6 bg-gradient-to-br from-red-500 to-red-600 rounded flex items-center justify-center">
-                <span className="text-white text-xs font-bold">∿</span>
+              <div className="w-8 h-8 bg-gradient-to-br from-red-500 via-red-600 to-red-700 rounded-lg flex items-center justify-center shadow-lg shadow-red-500/30">
+                <span className="text-white text-sm font-bold">♪</span>
               </div>
-              <h3 className="text-lg font-medium text-foreground">Audio Profiles</h3>
+              <div>
+                <h3 className="text-lg font-bold text-foreground">Dolby Audio Profiles</h3>
+                <p className="text-xs text-red-400 uppercase tracking-wider">Premium Sound Experience</p>
+              </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-4">
               {[
-                { id: 'manual', label: 'Manual', description: 'Custom tuning', icon: '⚙️' },
-                { id: 'brilliant-treble', label: 'Crisp', description: 'Enhanced clarity', icon: '💎' },
-                { id: 'bass-boost', label: 'Deep', description: 'Rich bass', icon: '🎵' },
-                { id: 'vocal-boost', label: 'Voice', description: 'Clear dialogue', icon: '🎤' }
+                {
+                  id: 'manual',
+                  label: 'Custom',
+                  description: 'Manual tuning',
+                  icon: '🎛️',
+                  gradient: 'from-slate-600 to-slate-700'
+                },
+                {
+                  id: 'brilliant-treble',
+                  label: 'Crystal',
+                  description: 'Dolby Clarity',
+                  icon: '💎',
+                  gradient: 'from-blue-500 to-cyan-500'
+                },
+                {
+                  id: 'bass-boost',
+                  label: 'Thunder',
+                  description: 'Deep Bass+',
+                  icon: '⚡',
+                  gradient: 'from-purple-500 to-pink-500'
+                },
+                {
+                  id: 'vocal-boost',
+                  label: 'Cinema',
+                  description: 'Voice Clarity',
+                  icon: '🎬',
+                  gradient: 'from-green-500 to-emerald-500'
+                }
               ].map((preset) => (
                 <Button
                   key={preset.id}
