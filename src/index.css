@@ -75,6 +75,11 @@ All colors MUST be HSL.
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-glass: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
 
+    /* Animated background */
+    --bg-glow-1: hsl(217 91% 60% / 0.1);
+    --bg-glow-2: hsl(265 85% 70% / 0.1);
+    --bg-glow-3: hsl(142 76% 36% / 0.05);
+
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
