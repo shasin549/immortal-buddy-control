@@ -310,13 +310,13 @@ const EarbudControl = () => {
           </div>
           
           {!earbudState.isConnected && (
-            <Button 
+            <Button
               onClick={toggleConnection}
-              className="w-full mt-4"
-              variant="default"
+              className="w-full mt-4 glass-button border-0"
+              variant="ghost"
             >
               <Power className="w-4 h-4 mr-2" />
-              Connect
+              Connect Device
             </Button>
           )}
         </Card>
